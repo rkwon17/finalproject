@@ -72,13 +72,6 @@ head(m90)
 
 
 library(censusapi)
-#### Can Delete this Section ####
-# Add key to .Renviron
-Sys.setenv(CENSUS_KEY='b93d047fb4e31a3e7167748bfe4a0ece21cdb5cf' )
-# Reload .Renviron
-readRenviron("~/.Renviron")
-# Check to see that the expected key is output in your R console
-Sys.getenv("CENSUS_KEY")
 
 #### New censusapi ####
 #census_key <- 
