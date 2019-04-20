@@ -7,69 +7,72 @@ library(texreg)
 library(tidycensus)
 library(ggplot2)
 library(stringr)
+library(tidyverse)
 
 # a list of all the ACS 2015 variables is stored here. https://api.census.gov/data/2015/acs/acs5/subject/variables.html
 vars <- data.frame(load_variables(2016, 'acs5')) # downloads a list of all variables from the 2016 ACS
 head(vars) # there are a LOT of options
 
-vars2 <- data.frame(load_variables(2010, 'sf1')) 
-head(vars2)
+allvars2010 <- data.frame(load_variables(2010, 'sf1')) 
+allvars2000 <- data.frame(load_variables(2000, 'sf1')) 
+allvars1990 <- data.frame(load_variables(1990, 'sf1')) 
 
-
-race_vars <- vars[str_detect(vars$concept, 'RACE'), ] # what is the following code designed to do?
+race_vars <- vars[str_detect(vars2000$concept, 'RACE'), ] # what is the following code designed to do?
 white_race_vars <- race_vars[str_detect(race_vars$concept, 'HISPANIC'), ]
 
-race_vars2 <- vars2[str_detect(vars2$concept, 'RACE'), ] # what is the following code designed to do?
+race_vars2 <- vars2[str_detect(vars2000$concept, 'RACE'), ] # what is the following code designed to do?
 his_race_vars2 <- race_vars2[str_detect(race_vars2$concept, 'HISPANIC'), ]
 head(white_race_vars)
 
-# P005001 --> P005017 -- Race & ethnicity
 # P007001 --> P007015 -- Total race tally? alternative way to look at data
 # P015001 -- household by race (homeowners)
 
-
-var_names <- NA
+vars2010 <- NA
 
 for (i in 1:17) {
   if (i <10){
-    var_names[i] <- paste( 'P00500', i, sep = "")}
-  else{var_names[i] <- paste( 'P0050', i, sep = "")}
+    vars2010[i] <- paste( 'P00500', i, sep = "")}
+  else{vars2010[i] <- paste( 'P0050', i, sep = "")}
 }
 
+vars2010 <- c(vars2010, "P004002", "P004003")
 
-dicensus_dat <- get_decennial(geography = "zcta", variables = var_names, geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P005001', state= 'Massachusetts')
+cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts')
 
-dicensus_dat2 <- get_decennial(geography = "zcta", variables = 'P005001', geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts')
+vars2000 <- c("P004001","P004002","P004003","P004004","P004005","P004006","P004007","P004008","P004009","P004010","P004011")
 
-census_dat <- get_acs(geography = "State", variables = c('B03002_001',
-                                                         'B03002_002',
-                                                         'B03002_003',
-                                                         'B03002_004',
-                                                         'B03002_005',
-                                                         'B03002_006',
-                                                         'B03002_007',
-                                                         'B03002_008',
-                                                         'B03002_009',
-                                                         'B03002_010',
-                                                         'B03002_011',
-                                                         'B03002_012',
-                                                         'B03002_013',
-                                                         'B03002_014',
-                                                         'B03002_015',
-                                                         'B03002_016',
-                                                         'B03002_017',
-                                                         'B03002_018',
-                                                         'B03002_019',
-                                                         'B03002_020',
-                                                         'B03002_021'), geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'S0101_C01_001') # can you make sense of what this code is doing? Either look at the head of census_dat or the help file for get_acs. Feel free to download other variables, just make sure you get the one about the proportion of people who are residents
-head(census_dat) # which variable do you think we're going to use to link with the cces data?
+cendat2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts')
+
+vars1990 <- c("P0100001","P0100002","P0100003","P0100004","P0100005","P0090001","P0080001")
+
+county1990 <- c("01","03","05","07","09","11","13","15","17","19","21","23","25","27")
+
+cendat1990a <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = '05')
+
+cendat1990b <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = '03')
+
+cendat1990<- rbind(cendat1990a,cendat1990b)
+
+cendat1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = '01')
+
+for (i in 2:length(county1990)) {
+  temp <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = FALSE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = county1990[i])
+  
+  cendat1990<- rbind(cendat1990, temp)
+}
+
+cendat1990[cendat1990$GEOID %in% cendat1990$GEOID[duplicated(cendat1990$GEOID)],]
+
+cendat1990$test <- rowSums(cendat1990[,8:9])
 
 census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreign_total' = 'B05006_001E', 'recent_total' = 'B05007_002E',
                               'population' = 'summary_est')
 
+
 m90 <- get_decennial(geography = "state", variables = "H043A001", year = 1990)
 head(m90)
 
+#P080A001 -- income?
 
 library(censusapi)
 
@@ -88,30 +91,25 @@ cen_api_vars <- listCensusMetadata(name = "dec/sf1", vintage = 2010,
 geo<- listCensusMetadata(name = "dec/sf1", vintage = 2010,
                          type = "geography")
 
-cen_dat <- getCensus(name = 'dec/sf1',
-                     vintage = 2010,
-                     region ="tract:*",
-                     regionin = "state:25",
-                     vars = c("NAME", "P001001","P011002" ))
 
 cen_dat2010 <- getCensus(name = 'dec/sf1',
                          vintage = 2010,
                          region ="tract:*",
                          regionin = "state:25",
-                         vars = c("NAME", var_names, "P004002", "P004003" ))
-head(cen_dat2)
+                         vars = vars2010)
 
-cen_dat2000 <- getCensus(name = 'dec/sf1',
-                         vintage = 2010,
-                         region ="zip code tabulation area:*",
-                         #regionin = "state:25",
-                         vars = c("NAME", "STATE", "COUNTY", 'TRACT',"P004002", "P004003" ))
-head(cen_dat2)
 
-top_surnames <- getCensus(name = "surname",
-                          vintage = 2010,
-                          vars = c("NAME", "COUNT", "PROP100K", "PCTWHITE", "PCTBLACK", "PCTAIAN", "PCTAPI", "PCTHISPANIC", "PCT2PRACE"),
-                          RANK = "1:25", 
-                          key = census_key)
-head(top_surnames)
-head(cen_dat)
+cen_dat2000 <- getCensus(name = 'sf1',
+                         vintage = 2000,
+                         region ="tract:*",
+                         regionin = "state:25",
+                         vars = vars2000)
+
+#"state:36+county:027+tract:010000" 
+
+cen_dat1990 <- getCensus(name = 'sf1',
+                         vintage = 1990,
+                         region ="county:*",
+                         regionin = "state:25",
+                         vars = 'P0010001')
+
