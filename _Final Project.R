@@ -1,4 +1,4 @@
-#### last updated: Erin @ 9:09am on 4/23
+#### last updated: Rachel 4/23/19
 
 rm(list = ls())
 setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory 
@@ -10,6 +10,18 @@ library(tidycensus)
 library(ggplot2)
 library(stringr)
 library(tidyverse)
+
+#map libraries - need these to load shapefile
+library(leaflet)
+library(tigris)
+library(acs)
+
+
+#shapefile test
+lookup_code(state="MA",county="Suffolk")
+countylist <- c('17','25') #cambridge + boston (fips codes for suffolk + middlesex)
+shapefile <- tracts(state='25', county=countylist) #cambridge and boston
+plot(shapefile)
 
 # a list of all the ACS 2015 variables is stored here. https://api.census.gov/data/2015/acs/acs5/subject/variables.html
 vars <- data.frame(load_variables(2016, 'acs5')) # downloads a list of all variables from the 2016 ACS
