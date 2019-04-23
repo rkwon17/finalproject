@@ -1,3 +1,5 @@
+#### last updated: Erin @ 9:09am on 4/23
+
 rm(list = ls())
 setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory 
 
@@ -67,6 +69,11 @@ cendat1990$test <- rowSums(cendat1990[,8:9])
 
 census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreign_total' = 'B05006_001E', 'recent_total' = 'B05007_002E',
                               'population' = 'summary_est')
+
+
+# Erin testing 2000 white-only data 
+test_vars2000 <- c('P003003', 'P003004', 'P003001')
+test_cendat2000 <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = '01')
 
 
 m90 <- get_decennial(geography = "state", variables = "H043A001", year = 1990)
