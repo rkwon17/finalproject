@@ -1,5 +1,6 @@
-#### last updated: Rachel 4/23/19
+#### last updated: Erin 4/23/19 @ 6pm
 
+#### set up ####
 rm(list = ls())
 setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory 
 
@@ -18,11 +19,13 @@ library(tigris)
 library(acs)
 
 
-#shapefile test
+#### shapefile test ####
 lookup_code(state="MA",county="Suffolk")
 countylist <- c('17','25') #cambridge + boston (fips codes for suffolk + middlesex)
 shapefile <- tracts(state='25', county=countylist) #cambridge and boston
 plot(shapefile)
+
+#### testing pulls ####
 
 # a list of all the ACS 2015 variables is stored here. https://api.census.gov/data/2015/acs/acs5/subject/variables.html
 vars <- data.frame(load_variables(2016, 'acs5')) # downloads a list of all variables from the 2016 ACS
@@ -82,26 +85,36 @@ cendat1990$test <- rowSums(cendat1990[,8:9])
 
 census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreign_total' = 'B05006_001E', 'recent_total' = 'B05007_002E',
                               'population' = 'summary_est')
-#rachel testing 1990 white only data
-test_vars1990 <- c('P0070001')
-test_cendat1990 <- get_decennial(geography = "tract", variables = test_vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = '01')
 
-# Erin testing 2000 white-only data 
+#### maps of white-only ####
+
+# 1990 - this seems to be working!
+test_vars1990 <- c('P0070001')
+countylist <- c('Suffolk', 'Middlesex')
+test_cendat1990 <- get_decennial(geography = "tract", variables = test_vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
+
+# YAY MAPS
+ggplot(test_cendat1990, aes(fill = P0070001, color = P0070001)) +
+  geom_sf()
+  coord_sf(crs = 26914)
+
+# 2000 - also seems to be working!
 test_vars2000 <- c('P003003', 'P003004', 'P003001')
 countylist <- c('Suffolk', 'Middlesex')
 test_cendat2000 <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
 
-#OMG A MAP WITH REAL COLORS YAY (fyi: this is very preliminary. doesn't even get close to what we're actually aiming for. but it's a map!)
+#OMG A MAP WITH REAL COLORS YAY 
+#(fyi: this is very preliminary. doesn't even get close to what we're actually aiming for. but it's a map!)
 ggplot(test_cendat2000, aes(fill = P003003, color = P003003)) +
-  geom_sf() + # add a spatial geom
+  geom_sf() +
   coord_sf(crs = 26914)
 
-#rachel testing 2010 white-only data - HI THIS DOESN'T WORK IDK WHY SOS
+# 2010 - this is throwing errors!
 test_vars2010 <- c('P0010003','P0010001') #white alone, population total
 test_cendat2010 <- get_decennial(geography = "tract", variables = test_vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = 'Suffolk')
 
 
-
+#### censusapi ####
 
 m90 <- get_decennial(geography = "state", variables = "H043A001", year = 1990)
 head(m90)
