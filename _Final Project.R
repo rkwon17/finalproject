@@ -100,7 +100,7 @@ ggplot(test_cendat1990, aes(fill = P0070001, color = P0070001)) +
 
 # 2000 - also seems to be working!
 test_vars2000 <- c('P003003', 'P003004', 'P003001')
-countylist <- c('Suffolk', 'Middlesex')
+countylist <- c('Suffolk', 'Middlesex', 'Norfolk')
 test_cendat2000 <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
 
 #OMG A MAP WITH REAL COLORS YAY 
@@ -108,6 +108,12 @@ test_cendat2000 <- get_decennial(geography = "tract", variables = test_vars2000,
 ggplot(test_cendat2000, aes(fill = P003003, color = P003003)) +
   geom_sf() +
   coord_sf(crs = 26914)
+
+# attempting a full MA map with only the relevant stuff filled in
+test_cendat2000_empty <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts')
+relevant_tracts_2000 <- test_cendat2000$NAME # create a vector of all census tracts of actual interest to us
+test_cendat2000_empty[test_vars2000]# go through test_cendat2000_empty and remove variable data for anything that ISN'T in that vector
+# plot
 
 # 2010 - this is throwing errors!
 test_vars2010 <- c('P0010003','P0010001') #white alone, population total
