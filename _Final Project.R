@@ -88,7 +88,13 @@ test_cendat1990 <- get_decennial(geography = "tract", variables = test_vars1990,
 
 # Erin testing 2000 white-only data 
 test_vars2000 <- c('P003003', 'P003004', 'P003001')
-test_cendat2000 <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = '01')
+countylist <- c('Suffolk', 'Middlesex')
+test_cendat2000 <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
+
+#OMG A MAP WITH REAL COLORS YAY (fyi: this is very preliminary. doesn't even get close to what we're actually aiming for. but it's a map!)
+ggplot(test_cendat2000, aes(fill = P003003, color = P003003)) +
+  geom_sf() + # add a spatial geom
+  coord_sf(crs = 26914)
 
 #rachel testing 2010 white-only data - HI THIS DOESN'T WORK IDK WHY SOS
 test_vars2010 <- c('P0010003','P0010001') #white alone, population total
