@@ -8,6 +8,7 @@ library(texreg)
 
 library(tidycensus)
 library(ggplot2)
+library(ggmap)
 library(stringr)
 library(tidyverse)
 
