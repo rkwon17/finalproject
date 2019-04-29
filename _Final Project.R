@@ -115,7 +115,7 @@ relevant_tracts_2000 <- test_cendat2000$NAME # create a vector of all census tra
 test_cendat2000_empty[test_vars2000]# go through test_cendat2000_empty and remove variable data for anything that ISN'T in that vector
 # plot
 
-# 2010 - this is throwing errors!
+# 2010 - think it's fixed (double check variables one last time)
 test_vars2010 <- c('P010003','P001001') #white alone, population total
 test_cendat2010 <- get_decennial(geography = "tract", variables = test_vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'Massachusetts', county = 'Suffolk')
 
