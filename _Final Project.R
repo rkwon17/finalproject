@@ -1,4 +1,4 @@
-#### last updated: Kevin 4/29/19 @ 12:30pm
+#### last updated: Kevin 4/29/19 @ 1:30pm
 
 #### set up ####
 rm(list = ls())
@@ -111,9 +111,14 @@ ggplot(test_cendat2000, aes(fill = P003003, color = P003003)) +
 
 # attempting a full MA map with only the relevant stuff filled in
 test_cendat2000_empty <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts')
-relevant_tracts_2000 <- test_cendat2000$NAME # create a vector of all census tracts of actual interest to us
-test_cendat2000_empty[test_vars2000]# go through test_cendat2000_empty and remove variable data for anything that ISN'T in that vector
+relevant_tracts_2000 <- test_cendat2000$GEOID # create a vector of all census tracts of actual interest to us
+test_tract <- relevant_tracts_2000[2:4] #testing with onlyl a few 
+test_cendat2000_empty[!(test_cendat2000_empty$GEOID %in% relevant_tracts_2000), test_vars2000 ]<- NA # removing data for variales only if they are not in the relevant tracts 
+
 # plot
+ggplot(test_cendat2000_empty, aes(fill = P003003, color = P003003)) +
+  geom_sf() +
+  coord_sf(crs = 26914)
 
 # 2010 - think it's fixed (double check variables one last time)
 test_vars2010 <- c('P010003','P001001') #white alone, population total
