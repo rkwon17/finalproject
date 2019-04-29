@@ -116,9 +116,12 @@ test_cendat2000_empty[test_vars2000]# go through test_cendat2000_empty and remov
 # plot
 
 # 2010 - this is throwing errors!
-test_vars2010 <- c('P0010003','P0010001') #white alone, population total
-test_cendat2010 <- get_decennial(geography = "tract", variables = test_vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = 'Suffolk')
+test_vars2010 <- c('P010003','P001001') #white alone, population total
+test_cendat2010 <- get_decennial(geography = "tract", variables = test_vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'Massachusetts', county = 'Suffolk')
 
+ggplot(test_cendat2010, aes(fill = P010003, color = P010003)) +
+  geom_sf() +
+  coord_sf(crs = 26914)
 
 #### censusapi ####
 
