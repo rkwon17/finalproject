@@ -1,4 +1,4 @@
-#### last updated: Kevin 4/29/19 @ 1:30pm
+#### last updated: Kevin 4/30/19 @ 1pm
 
 #### set up ####
 rm(list = ls())
@@ -90,7 +90,7 @@ census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreig
 
 # 1990 - this seems to be working!
 test_vars1990 <- c('P0070001')
-countylist <- c('Suffolk', 'Middlesex')
+countylist <- c('Suffolk', 'Middlesex', 'Norfolk')
 test_cendat1990 <- get_decennial(geography = "tract", variables = test_vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
 
 # YAY MAPS
@@ -122,7 +122,7 @@ ggplot(test_cendat2000_empty, aes(fill = P003003, color = P003003)) +
 
 # 2010 - think it's fixed (double check variables one last time)
 test_vars2010 <- c('P010003','P001001') #white alone, population total
-test_cendat2010 <- get_decennial(geography = "tract", variables = test_vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'Massachusetts', county = 'Suffolk')
+test_cendat2010 <- get_decennial(geography = "tract", variables = test_vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'Massachusetts', county = countylist)
 
 ggplot(test_cendat2010, aes(fill = P010003, color = P010003)) +
   geom_sf() +
@@ -132,3 +132,44 @@ ggplot(test_cendat2010, aes(fill = P010003, color = P010003)) +
 
 
 # Changing to Percentages 
+
+test_cendat2010$pct_white <- round(test_cendat2010$P010003 / test_cendat2010$P001001, 3) * 100 
+
+#plot percentages 
+plot_2010 <- ggplot(test_cendat2010, aes(fill = pct_white, color = pct_white)) +
+  geom_sf() +
+  coord_sf(crs = 26914)
+
+
+# plot percentage 2000
+test_cendat2000$pct_white <- round(test_cendat2000$P003003 / test_cendat2000$summary_value, 3) * 100 
+plot_2000 <- ggplot(test_cendat2000, aes(fill = pct_white, color = pct_white)) +
+  geom_sf() +
+  coord_sf(crs = 26914)
+
+# plot percentage 1990
+test_cendat1990$pct_white1990 <- round(test_cendat1990$P0070001 / test_cendat1990$summary_value, 3) * 100 
+plot_1990 <- ggplot(test_cendat1990, aes(fill = pct_white1990, color = pct_white1990)) +
+  geom_sf()
+coord_sf(crs = 26914)
+
+library(gridExtra)
+grid.arrange(plot_1990, plot_2000, plot_2010)
+
+# join and compare percentage over time? 
+
+sub_1990 <- as.data.frame(test_cendat1990[, c('GEOID', 'pct_white1990')])
+sub_1990$geometry <- NULL
+sub_2010 <- as.data.frame(test_cendat2010[, c('GEOID', 'pct_white')])
+compare_pct <- right_join(sub_2010,sub_1990, by= "GEOID")
+compare_pct %<>% subset(!is.na(pct_white)) 
+
+
+compare_pct$change <- compare_pct$pct_white - compare_pct$pct_white1990
+
+ggplot(compare_pct, aes(fill = change, color = change)) +
+  geom_sf()
+coord_sf(crs = 26914)
+
+# can't figure out why this is only creating one point
+ggplot(compare_pct, aes(x = "pct_white", y = "change")) + geom_point()
