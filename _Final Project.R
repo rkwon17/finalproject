@@ -135,42 +135,5 @@ head(m90)
 
 #P080A001 -- income?
 
-library(censusapi)
 
-#### New censusapi ####
-#census_key <- 
-
-apis <- listCensusApis()
-View(apis)
-
-# p011002  zip+code+tabulation+area:
-#"P011002"-- 18 and over
-
-cen_api_vars <- listCensusMetadata(name = "dec/sf1", vintage = 2010, 
-                                   type = "variables")
-
-geo<- listCensusMetadata(name = "dec/sf1", vintage = 2010,
-                         type = "geography")
-
-
-cen_dat2010 <- getCensus(name = 'dec/sf1',
-                         vintage = 2010,
-                         region ="tract:*",
-                         regionin = "state:25",
-                         vars = vars2010)
-
-
-cen_dat2000 <- getCensus(name = 'sf1',
-                         vintage = 2000,
-                         region ="tract:*",
-                         regionin = "state:25",
-                         vars = vars2000)
-
-#"state:36+county:027+tract:010000" 
-
-cen_dat1990 <- getCensus(name = 'sf1',
-                         vintage = 1990,
-                         region ="county:*",
-                         regionin = "state:25",
-                         vars = 'P0010001')
 
