@@ -128,12 +128,7 @@ ggplot(test_cendat2010, aes(fill = P010003, color = P010003)) +
   geom_sf() +
   coord_sf(crs = 26914)
 
-#### censusapi ####
-
-m90 <- get_decennial(geography = "state", variables = "H043A001", year = 1990)
-head(m90)
-
 #P080A001 -- income?
 
 
-
+# Changing to Percentages 
