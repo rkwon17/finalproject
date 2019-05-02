@@ -86,72 +86,70 @@ cendat1990$test <- rowSums(cendat1990[,8:9])
 census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreign_total' = 'B05006_001E', 'recent_total' = 'B05007_002E',
                               'population' = 'summary_est')
 
-#### maps of white-only ####
 
-# 1990 - this seems to be working!
-test_vars1990 <- c('P0070001')
-countylist <- c('Suffolk', 'Middlesex', 'Norfolk')
-test_cendat1990 <- get_decennial(geography = "tract", variables = test_vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
-
-# YAY MAPS
-ggplot(test_cendat1990, aes(fill = P0070001, color = P0070001)) +
-  geom_sf()
-  coord_sf(crs = 26914)
-
-# 2000 - also seems to be working!
-test_vars2000 <- c('P003003', 'P003004', 'P003001')
-countylist <- c('Suffolk', 'Middlesex', 'Norfolk')
-test_cendat2000 <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
-
-#OMG A MAP WITH REAL COLORS YAY 
-#(fyi: this is very preliminary. doesn't even get close to what we're actually aiming for. but it's a map!)
-ggplot(test_cendat2000, aes(fill = P003003, color = P003003)) +
-  geom_sf() +
-  coord_sf(crs = 26914)
-
-# attempting a full MA map with only the relevant stuff filled in
-test_cendat2000_empty <- get_decennial(geography = "tract", variables = test_vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts')
-relevant_tracts_2000 <- test_cendat2000$GEOID # create a vector of all census tracts of actual interest to us
-test_tract <- relevant_tracts_2000[2:4] #testing with onlyl a few 
-test_cendat2000_empty[!(test_cendat2000_empty$GEOID %in% relevant_tracts_2000), test_vars2000 ]<- NA # removing data for variales only if they are not in the relevant tracts 
-
-# plot
-ggplot(test_cendat2000_empty, aes(fill = P003003, color = P003003)) +
-  geom_sf() +
-  coord_sf(crs = 26914)
-
-# 2010 - think it's fixed (double check variables one last time)
-test_vars2010 <- c('P010003','P001001') #white alone, population total
-test_cendat2010 <- get_decennial(geography = "tract", variables = test_vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'Massachusetts', county = countylist)
-
-ggplot(test_cendat2010, aes(fill = P010003, color = P010003)) +
-  geom_sf() +
-  coord_sf(crs = 26914)
 
 #P080A001 -- income?
 
 
 # Changing to Percentages 
+test_cendat2010$pct_white_2010 <- round(test_cendat2010$P010003 / test_cendat2010$P001001, 3) * 100 
+test_cendat2000$pct_white_2000 <- round(test_cendat2000$P003003 / test_cendat2000$summary_value, 3) * 100 
+test_cendat1990$pct_white_1990 <- round(test_cendat1990$P0070001 / test_cendat1990$summary_value, 3) * 100 
 
-test_cendat2010$pct_white <- round(test_cendat2010$P010003 / test_cendat2010$P001001, 3) * 100 
+# MAP! 2010
+pal2010 = colorNumeric(palette = "viridis", domain = test_cendat2010$pct_white_2010)
+test_cendat2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal2010(pct_white_2010)) %>%
+  addLegend("bottomright", 
+            pal = pal2010, 
+            values = ~ pct_white_2010,
+            title = "Census Tract Pct White",
+            opacity = 1)
 
-#plot percentages 
-plot_2010 <- ggplot(test_cendat2010, aes(fill = pct_white, color = pct_white)) +
-  geom_sf() +
-  coord_sf(crs = 26914)
+# MAP! 2000
+pal2000 = colorNumeric(palette = "viridis", domain = test_cendat2000$pct_white_2000)
+test_cendat2000 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal2000(pct_white_2000)) %>%
+  addLegend("bottomright", 
+            pal = pal2000, 
+            values = ~ pct_white_2000,
+            title = "Census Tract Pct White",
+            opacity = 1)
+
+# MAP! 1990
+pal1990 = colorNumeric(palette = "viridis", domain = test_cendat1990$pct_white_1990)
+test_cendat1990 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal1990(pct_white_1990)) %>%
+  addLegend("bottomright", 
+            pal = pal1990, 
+            values = ~ pct_white_1990,
+            title = "Census Tract Pct White",
+            opacity = 1)
 
 
-# plot percentage 2000
-test_cendat2000$pct_white <- round(test_cendat2000$P003003 / test_cendat2000$summary_value, 3) * 100 
-plot_2000 <- ggplot(test_cendat2000, aes(fill = pct_white, color = pct_white)) +
-  geom_sf() +
-  coord_sf(crs = 26914)
 
-# plot percentage 1990
-test_cendat1990$pct_white1990 <- round(test_cendat1990$P0070001 / test_cendat1990$summary_value, 3) * 100 
-plot_1990 <- ggplot(test_cendat1990, aes(fill = pct_white1990, color = pct_white1990)) +
-  geom_sf()
-coord_sf(crs = 26914)
+
 
 library(gridExtra)
 grid.arrange(plot_1990, plot_2000, plot_2010)
