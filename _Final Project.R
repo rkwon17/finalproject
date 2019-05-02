@@ -1,4 +1,4 @@
-#### last updated: Kevin 4/30/19 @ 1pm
+#### last updated: Erin 5/2/2019 @ 6pm
 
 #### set up ####
 rm(list = ls())
@@ -185,7 +185,7 @@ map2000
 map2010
 
 library(htmltools)
-# view all leaflets together -- not sure why the titles don't all appear
+# view all leaflets together -- not sure why the titles don't all appear. ugh.
 leaflet_grid <- 
   tagList(
     tags$table(width = "100%",
