@@ -19,13 +19,13 @@ library(tigris)
 library(acs)
 
 
-#### shapefile test ####
+#### shapefile test - OLD ####
 lookup_code(state="MA",county="Suffolk")
 countylist <- c('17','25') #cambridge + boston (fips codes for suffolk + middlesex)
 shapefile <- tracts(state='25', county=countylist) #cambridge and boston
 plot(shapefile)
 
-#### testing pulls ####
+#### testing pulls - OLD ####
 
 # a list of all the ACS 2015 variables is stored here. https://api.census.gov/data/2015/acs/acs5/subject/variables.html
 vars <- data.frame(load_variables(2016, 'acs5')) # downloads a list of all variables from the 2016 ACS
@@ -86,19 +86,26 @@ cendat1990$test <- rowSums(cendat1990[,8:9])
 census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreign_total' = 'B05006_001E', 'recent_total' = 'B05007_002E',
                               'population' = 'summary_est')
 
+#### mapping non-white percentage ####
+countylist <- c('Suffolk', 'Middlesex', 'Norfolk')
 
+vars1990 <- c('P0070001')
+cendat1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
 
-#P080A001 -- income?
+vars2000 <- c('P003003', 'P003004', 'P003001')
+cendat2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
 
+vars2010 <- c('P010003','P001001') #white alone, population total
+cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'Massachusetts', county = countylist)
 
 # Changing to Percentages 
-test_cendat2010$pct_white_2010 <- round(test_cendat2010$P010003 / test_cendat2010$P001001, 3) * 100 
-test_cendat2000$pct_white_2000 <- round(test_cendat2000$P003003 / test_cendat2000$summary_value, 3) * 100 
-test_cendat1990$pct_white_1990 <- round(test_cendat1990$P0070001 / test_cendat1990$summary_value, 3) * 100 
+cendat2010$pct_white_2010 <- round(cendat2010$P010003 / cendat2010$P001001, 3) * 100 
+cendat2000$pct_white_2000 <- round(cendat2000$P003003 / cendat2000$summary_value, 3) * 100 
+cendat1990$pct_white_1990 <- round(cendat1990$P0070001 / cendat1990$summary_value, 3) * 100 
 
 # MAP! 2010
-pal2010 = colorNumeric(palette = "viridis", domain = test_cendat2010$pct_white_2010)
-test_cendat2010 %>%
+pal2010 = colorNumeric(palette = "viridis", domain = cendat2010$pct_white_2010)
+cendat2010 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -114,8 +121,8 @@ test_cendat2010 %>%
             opacity = 1)
 
 # MAP! 2000
-pal2000 = colorNumeric(palette = "viridis", domain = test_cendat2000$pct_white_2000)
-test_cendat2000 %>%
+pal2000 = colorNumeric(palette = "viridis", domain = cendat2000$pct_white_2000)
+cendat2000 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -131,8 +138,8 @@ test_cendat2000 %>%
             opacity = 1)
 
 # MAP! 1990
-pal1990 = colorNumeric(palette = "viridis", domain = test_cendat1990$pct_white_1990)
-test_cendat1990 %>%
+pal1990 = colorNumeric(palette = "viridis", domain = cendat1990$pct_white_1990)
+cendat1990 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -147,14 +154,10 @@ test_cendat1990 %>%
             title = "Census Tract Pct White",
             opacity = 1)
 
+#P080A001 -- income?
 
 
-
-
-library(gridExtra)
-grid.arrange(plot_1990, plot_2000, plot_2010)
-
-# join and compare percentage over time? 
+#### join and compare percentage over time? ####
 
 sub_1990 <- as.data.frame(test_cendat1990[, c('GEOID', 'pct_white1990')])
 sub_1990$geometry <- NULL
