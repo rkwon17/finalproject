@@ -17,6 +17,7 @@ library(tidyverse)
 library(leaflet)
 library(tigris)
 library(acs)
+library(gridExtra)
 
 
 #### shapefile test - OLD ####
@@ -87,7 +88,7 @@ census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreig
                               'population' = 'summary_est')
 
 #### mapping non-white percentage ####
-countylist <- c('Suffolk', 'Middlesex', 'Norfolk')
+countylist <- c('Suffolk')
 
 vars1990 <- c('P0070001')
 cendat1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
@@ -103,9 +104,31 @@ cendat2010$pct_white_2010 <- round(cendat2010$P010003 / cendat2010$P001001, 3) *
 cendat2000$pct_white_2000 <- round(cendat2000$P003003 / cendat2000$summary_value, 3) * 100 
 cendat1990$pct_white_1990 <- round(cendat1990$P0070001 / cendat1990$summary_value, 3) * 100 
 
+# Leaflet prep
+tag.map.title <- tags$style(HTML("
+  .leaflet-control.map-title { 
+                                 transform: translate(-50%,20%);
+                                 position: fixed !important;
+                                 left: 50%;
+                                 text-align: center;
+                                 padding-left: 10px; 
+                                 padding-right: 10px; 
+                                 background: rgba(255,255,255,0.75);
+                                 font-weight: bold;
+                                 font-size: 28px;
+                                 }
+                                 "))
+
+title1990 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 1990 Census")) 
+title2000 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 2000 Census")) 
+title2010 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 2010 Census")) 
+
 # MAP! 2010
 pal2010 = colorNumeric(palette = "viridis", domain = cendat2010$pct_white_2010)
-cendat2010 %>%
+map2010 <- cendat2010 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -118,11 +141,12 @@ cendat2010 %>%
             pal = pal2010, 
             values = ~ pct_white_2010,
             title = "Census Tract Pct White",
-            opacity = 1)
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
 
 # MAP! 2000
 pal2000 = colorNumeric(palette = "viridis", domain = cendat2000$pct_white_2000)
-cendat2000 %>%
+map2000 <- cendat2000 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -135,11 +159,12 @@ cendat2000 %>%
             pal = pal2000, 
             values = ~ pct_white_2000,
             title = "Census Tract Pct White",
-            opacity = 1)
+            opacity = 1) %>%
+  addControl(title2000, position = "topleft", className = "map-title")
 
 # MAP! 1990
 pal1990 = colorNumeric(palette = "viridis", domain = cendat1990$pct_white_1990)
-cendat1990 %>%
+map1990 <- cendat1990 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -152,7 +177,25 @@ cendat1990 %>%
             pal = pal1990, 
             values = ~ pct_white_1990,
             title = "Census Tract Pct White",
-            opacity = 1)
+            opacity = 1) %>%
+  addControl(title1990, position = "topleft", className = "map-title")
+
+map1990
+map2000
+map2010
+
+library(htmltools)
+# view all leaflets together -- not sure why the titles don't all appear
+leaflet_grid <- 
+  tagList(
+    tags$table(width = "100%",
+               tags$tr(
+                 tags$td(map1990),
+                 tags$td(map2000)),
+               tags$tr(
+                 tags$td(map2010))))
+browsable(leaflet_grid)
+
 
 #P080A001 -- income?
 
