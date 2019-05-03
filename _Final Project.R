@@ -1,4 +1,4 @@
-#### last updated: Erin 5/2/2019 @ 6pm
+#### last updated: Kevin 5/3/2019 @ 5pm
 
 #### set up ####
 rm(list = ls())
@@ -15,9 +15,11 @@ library(tidyverse)
 
 #map libraries - need these to load shapefile
 library(leaflet)
+library(htmltools)
 library(tigris)
 library(acs)
 library(gridExtra)
+library(sf)
 
 
 #### shapefile test - OLD ####
@@ -42,9 +44,6 @@ white_race_vars <- race_vars[str_detect(race_vars$concept, 'HISPANIC'), ]
 race_vars2 <- vars2[str_detect(vars2000$concept, 'RACE'), ] # what is the following code designed to do?
 his_race_vars2 <- race_vars2[str_detect(race_vars2$concept, 'HISPANIC'), ]
 head(white_race_vars)
-
-# P007001 --> P007015 -- Total race tally? alternative way to look at data
-# P015001 -- household by race (homeowners)
 
 vars2010 <- NA
 
@@ -136,7 +135,8 @@ map2010 <- cendat2010 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ pal2010(pct_white_2010)) %>%
+              color = ~ pal2010(pct_white_2010),
+              label = ~paste0(pct_white_2010, "%, (", P010003, ")")) %>%
   addLegend("bottomright", 
             pal = pal2010, 
             values = ~ pct_white_2010,
@@ -184,7 +184,6 @@ map1990
 map2000
 map2010
 
-library(htmltools)
 # view all leaflets together -- not sure why the titles don't all appear. ugh.
 leaflet_grid <- 
   tagList(
@@ -202,16 +201,16 @@ browsable(leaflet_grid)
 
 #### join and compare percentage over time? ####
 
-sub_1990 <- as.data.frame(test_cendat1990[, c('GEOID', 'pct_white1990')])
+sub_1990 <- as.data.frame(cendat1990[, c('GEOID', 'pct_white_1990')])
 sub_1990$geometry <- NULL
-sub_2010 <- as.data.frame(test_cendat2010[, c('GEOID', 'pct_white')])
+sub_2010 <- as.data.frame(cendat2010[, c('GEOID', 'pct_white_2010')])
 compare_pct <- right_join(sub_2010,sub_1990, by= "GEOID")
-compare_pct %<>% subset(!is.na(pct_white)) 
+compare_pct %<>% subset(!is.na(pct_white_2010)) 
 
 
 compare_pct$change <- compare_pct$pct_white - compare_pct$pct_white1990
 
-ggplot(compare_pct, aes(fill = change, color = change)) +
+ggplot(compare_pct, aes(fill = pct_white_2010, color = pct_white_2010)) +
   geom_sf()
 coord_sf(crs = 26914)
 
