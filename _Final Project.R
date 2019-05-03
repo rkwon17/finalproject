@@ -217,3 +217,72 @@ coord_sf(crs = 26914)
 
 # can't figure out why this is only creating one point
 ggplot(compare_pct, aes(x = "pct_white", y = "change")) + geom_point()
+
+
+
+
+###----------rachel experimenting with permutation------------
+summary(test_cendat2000)  #variable of interest here: #03 
+summary(test_cendat1990)  
+#read csv files
+setwd("~/Desktop")
+year2000 <- read.csv("/Users/rachelkwon/Desktop/year2000.csv")
+year1990 <- read.csv("/Users/rachelkwon/Desktop/year1990.csv")
+dim(year1990)
+names(test_cendat2000)
+names(test_cendat1990)
+
+#merge year dataframes to cendat data 
+testing_cendat2000 <- merge(test_cendat2000,year2000)
+testing_cendat1990 <- merge(test_cendat1990,year1990)
+names(testing_cendat1990) %<>% str_replace_all('P0070001', 'whiteonly')
+names(testing_cendat2000) %<>% str_replace_all('P003003', 'whiteonly')
+
+sub_testing_cendat2000 <- as.data.frame(testing_cendat2000[,c('NAME','GEOID','whiteonly','year')])
+sub_testing_cendat2000 <- subset(sub_testing_cendat2000,select=c(NAME,whiteonly,year))
+sub_testing_cendat1990 <- as.data.frame(testing_cendat1990[,c('NAME','GEOID','whiteonly','year')])
+sub_testing_cendat1990 <- subset(sub_testing_cendat1990,select=c(NAME,whiteonly,year))
+summary(sub_testing_cendat1990)
+summary(sub_testing_cendat2000)
+#sub_testing_cendat2000$geometry <- NULL
+#sub_testing_cendat1990$geometry <- NULL
+#merged 1990 and 2000 by year
+testing_1990_2000 <- rbind(sub_testing_cendat1990,sub_testing_cendat2000)
+testing_1990_2000$year %<>% factor(levels = c(1990, 2000), labels = c('1990', '2000'))
+table(testing_1990_2000$year)
+#actual permutation starts now
+
+set.seed(1)
+#testing
+#resample year
+testing_1990_2000$year_permuted <- sample(testing_1990_2000$year)
+testing_1990_2000[c('year', 'year_permuted')]
+#ttest
+t.test(whiteonly ~ year_permuted, testing_1990_2000)
+R <- 10000
+mean_diffs <- rep(NA, R)
+#for loop for permuting
+for(i in 1:R){
+  testing_1990_2000$year_permuted <- sample(testing_1990_2000$year_permuted)
+  means <- tapply(testing_1990_2000$whiteonly, testing_1990_2000$year_permuted, mean)
+  mean_diffs[i] <- means['2000'] - means['1990']
+  if(i %% 1000 == 0) print(i)
+}
+means <- tapply(testing_1990_2000$whiteonly, testing_1990_2000$year, mean)
+observed_mean <- means['2000'] - means['1990']
+mean_diffs <- data.frame(mean_diffs = mean_diffs)
+#this graph is suspect - look at it later
+ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) # nothing special about our mean
+
+densities <- density(mean_diffs$mean_diffs)
+plot_dat <- data.frame(x = densities$x, y = densities$y)
+#density plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
+
+#symmetric plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
+
+
