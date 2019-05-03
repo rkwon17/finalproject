@@ -1,4 +1,4 @@
-#### last updated: Kevin 5/3/2019 @ 5pm
+#### last updated: Rachel 5/3 6PM
 
 #### set up ####
 rm(list = ls())
