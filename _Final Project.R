@@ -1,4 +1,4 @@
-#### last updated: Rachel 5/3 6PM
+#### last updated: Kevin 5/4 3PM
 
 #### set up ####
 rm(list = ls())
@@ -154,7 +154,8 @@ map2000 <- cendat2000 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ pal2000(pct_white_2000)) %>%
+              color = ~ pal2000(pct_white_2000),
+              label = ~paste0(pct_white_2000, "%, (", P003003, ")"))%>%
   addLegend("bottomright", 
             pal = pal2000, 
             values = ~ pct_white_2000,
@@ -172,14 +173,14 @@ map1990 <- cendat1990 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ pal1990(pct_white_1990)) %>%
+              color = ~ pal1990(pct_white_1990),
+              label = ~paste0(pct_white_1990, "%, (", P0070001, ")")) %>%
   addLegend("bottomright", 
             pal = pal1990, 
             values = ~ pct_white_1990,
             title = "Census Tract Pct White",
             opacity = 1) %>%
   addControl(title1990, position = "topleft", className = "map-title")
-
 map1990
 map2000
 map2010
@@ -217,6 +218,7 @@ coord_sf(crs = 26914)
 # can't figure out why this is only creating one point
 ggplot(compare_pct, aes(x = "pct_white", y = "change")) + geom_point()
 
+save(cendat1990, cendat2000, cendat2010, map1990, map2000, map2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
 
 
 
