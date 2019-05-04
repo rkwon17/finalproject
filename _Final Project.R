@@ -103,6 +103,29 @@ cendat2010$pct_white_2010 <- round(cendat2010$P010003 / cendat2010$P001001, 3) *
 cendat2000$pct_white_2000 <- round(cendat2000$P003003 / cendat2000$summary_value, 3) * 100 
 cendat1990$pct_white_1990 <- round(cendat1990$P0070001 / cendat1990$summary_value, 3) * 100 
 
+#### DC 2010 ####
+dc_cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'District of Columbia')
+
+dc_cendat2010$pct_white_2010 <- round(dc_cendat2010$P010003 / dc_cendat2010$P001001, 3) * 100 
+
+dc_pal2010 = colorNumeric(palette = "viridis", domain = dc_cendat2010$pct_white_2010)
+dc_map2010 <- dc_cendat2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ dc_pal2010(pct_white_2010),
+              label = ~paste0(pct_white_2010, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = dc_pal2010, 
+            values = ~ pct_white_2010,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
+
 # Leaflet prep
 tag.map.title <- tags$style(HTML("
   .leaflet-control.map-title { 
