@@ -1,5 +1,5 @@
 #### last update ####
-# Erin 5/6 3pm
+# Erin 5/6 5pm
 
 #### set up ####
 rm(list = ls())
@@ -22,9 +22,10 @@ library(sf)
 
 
 #### prep for all maps ####
-vars1990 <- c('P0070001', 'P0100001', 'P0100002')
+vars1990 <- c('P0070001', 'P0100001')
 vars2000 <- c('P003003', 'P003004', 'P003001')
 vars2010 <- c('P010003') #white alone, population total
+pal_all = colorNumeric(palette = "viridis", domain = c(0, 100))
 tag.map.title <- tags$style(HTML("
                                  .leaflet-control.map-title { 
                                  transform: translate(-50%,20%);
@@ -64,7 +65,6 @@ cendat_MA_1990$pct_black <- round(cendat_MA_1990$P0100002 / cendat_MA_1990$summa
 
 #### BOSTON - Maps ####
 # MAP! 2010
-color_MA_2010 = colorNumeric(palette = "viridis", domain = cendat_MA_2010$pct_white)
 map_MA_2010 <- cendat_MA_2010 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
@@ -73,17 +73,16 @@ map_MA_2010 <- cendat_MA_2010 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ color_MA_2010(pct_white),
+              color = ~ pal_all(pct_white),
               label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
   addLegend("bottomright", 
-            pal = color_MA_2010, 
+            pal = pal_all, 
             values = ~ pct_white,
             title = "Census Tract Pct White",
             opacity = 1) %>%
   addControl(title2010, position = "topleft", className = "map-title")
 
 # MAP! 2000
-color_MA_2000 = colorNumeric(palette = "viridis", domain = cendat_MA_2000$pct_white)
 map_MA_2000 <- cendat_MA_2000 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
@@ -92,17 +91,16 @@ map_MA_2000 <- cendat_MA_2000 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ color_MA_2000(pct_white),
+              color = ~ pal_all(pct_white),
               label = ~paste0(pct_white, "%, (", P003003, ")"))%>%
   addLegend("bottomright", 
-            pal = color_MA_2000, 
+            pal = pal_all, 
             values = ~ pct_white,
             title = "Census Tract Pct White",
             opacity = 1) %>%
   addControl(title2000, position = "topleft", className = "map-title")
 
 # MAP! 1990
-color_MA_1990 = colorNumeric(palette = "viridis", domain = cendat_MA_1990$pct_white)
 map_MA_1990 <- cendat_MA_1990 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
@@ -111,29 +109,29 @@ map_MA_1990 <- cendat_MA_1990 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ pal1990(pct_white),
+              color = ~ pal_all(pct_white),
               label = ~paste0(pct_white, "%, (", P0070001, ")")) %>%
   addLegend("bottomright", 
-            pal = color_MA_1990, 
+            pal = pal_all, 
             values = ~ pct_white,
             title = "Census Tract Pct White",
             opacity = 1) %>%
   addControl(title1990, position = "topleft", className = "map-title")
 
 # view maps
-map1990
-map2000
-map2010
+map_MA_1990
+map_MA_2000
+map_MA_2010
 
 # view all leaflets together -- not sure why the titles don't all appear. ugh.
 leaflet_grid <- 
   tagList(
     tags$table(width = "100%",
                tags$tr(
-                 tags$td(map1990),
-                 tags$td(map2000)),
+                 tags$td(map_MA_1990),
+                 tags$td(map_MA_2000)),
                tags$tr(
-                 tags$td(map2010))))
+                 tags$td(map_MA_2010))))
 browsable(leaflet_grid)
 
 
@@ -143,7 +141,7 @@ cendat_DC_2010 <- get_decennial(geography = "tract", variables = vars2010, year 
 
 cendat_DC_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'District of Columbia')
 
-cendat_DC_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'District of Columbia')
+cendat_DC_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'District of Columbia') #this gives errors!!!
 
 # Change to %s
 cendat_DC_2010$pct_white <- round(cendat_DC_2010$P010003 / cendat_DC_2010$summary_value, 3) * 100 
@@ -152,7 +150,6 @@ cendat_DC_1990$pct_white <- round(cendat_DC_1990$P0070001 / cendat_DC_1990$summa
 
 #### DC - Maps ####
 # Map 2010
-color_DC_2010 = colorNumeric(palette = "viridis", domain = cendat_DC_2010$pct_white)
 map_DC_2010 <- cendat_DC_2010 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
@@ -161,18 +158,17 @@ map_DC_2010 <- cendat_DC_2010 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ color_DC_2010(pct_white),
+              color = ~ pal_all(pct_white),
               label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
   addLegend("bottomright", 
-            pal = color_DC_2010, 
+            pal = pal_all, 
             values = ~ pct_white,
             title = "Census Tract Pct White",
             opacity = 1) %>%
   addControl(title2010, position = "topleft", className = "map-title")
 
 # Map 2000
-color_DC_2000 = colorNumeric(palette = "viridis", domain = cendat_DC_2000$pct_white)
-map_DC_2000 <- cendat_DC_2010 %>%
+map_DC_2000 <- cendat_DC_2000 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -180,18 +176,17 @@ map_DC_2000 <- cendat_DC_2010 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ color_DC_2000(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", P003003, ")")) %>%
   addLegend("bottomright", 
-            pal = color_DC_2000, 
+            pal = pal_all, 
             values = ~ pct_white,
             title = "Census Tract Pct White",
             opacity = 1) %>%
   addControl(title2000, position = "topleft", className = "map-title")
 
 # Map 1990
-color_DC_1990 = colorNumeric(palette = "viridis", domain = cendat_DC_1990$pct_white)
-map_DC_1990 <- cendat_DC_2010 %>%
+map_DC_1990 <- cendat_DC_1990 %>%
   st_transform(crs = "+init=epsg:4326") %>%
   leaflet(width = "100%") %>%
   addProviderTiles(provider = "CartoDB.Positron") %>%
@@ -199,15 +194,179 @@ map_DC_1990 <- cendat_DC_2010 %>%
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ color_DC_1990(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", P0070001, ")")) %>%
   addLegend("bottomright", 
-            pal = color_DC_1990, 
+            pal = pal_all, 
             values = ~ pct_white,
             title = "Census Tract Pct White",
             opacity = 1) %>%
   addControl(title1990, position = "topleft", className = "map-title")
 
+map_DC_2010
+map_DC_2000
+map_DC_1990
+
+#### OAKLAND - Pulls and cleaning ####
+countylist_CA <- c('Alameda', 'Contra Costa', 'San Francisco', 'San Mateo', 'Marin', 'Santa Clara')
+
+cendat_CA_2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'California', county = countylist_CA)
+
+cendat_CA_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'California', county = countylist_CA)
+
+cendat_CA_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'California', county = countylist_CA)
+
+# Changing to %
+cendat_CA_2010$pct_white <- round(cendat_CA_2010$P010003 / cendat_CA_2010$summary_value, 3) * 100 
+cendat_CA_2000$pct_white <- round(cendat_CA_2000$P003003 / cendat_CA_2000$summary_value, 3) * 100 
+cendat_CA_1990$pct_white <- round(cendat_CA_1990$P0070001 / cendat_CA_1990$summary_value, 3) * 100 
+
+#### OAKLAND - Maps ####
+map_CA_2010 <- cendat_CA_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = pal_all, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
+
+
+#### PORTLAND - Pulls and cleaning ####
+countylist_OR <- c('Columbia', 'Multnomah', 'Washington', 'Clackamas', 'Hood River')
+
+cendat_OR_2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Oregon', county = countylist_OR)
+
+cendat_OR_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Oregon', county = countylist_OR)
+
+cendat_OR_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Oregon', county = countylist_OR)
+
+# Changing to %
+cendat_OR_2010$pct_white <- round(cendat_OR_2010$P010003 / cendat_OR_2010$summary_value, 3) * 100 
+cendat_OR_2000$pct_white <- round(cendat_OR_2000$P003003 / cendat_OR_2000$summary_value, 3) * 100 
+cendat_OR_1990$pct_white <- round(cendat_OR_1990$P0070001 / cendat_OR_1990$summary_value, 3) * 100 
+
+#### PORTLAND - Maps ####
+map_OR_2010 <- cendat_OR_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = pal_all, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
+
+#### KNOXVILLE - Pulls and cleaning ####
+countylist_TN <- c('Knox', 'Anderson', 'Sevier', 'Blount')
+
+cendat_TN_2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Tennessee', county = countylist_TN)
+
+cendat_TN_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Tennessee', county = countylist_TN)
+
+cendat_TN_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Tennessee', county = countylist_TN)
+
+# Changing to %
+cendat_TN_2010$pct_white <- round(cendat_TN_2010$P010003 / cendat_TN_2010$summary_value, 3) * 100 
+cendat_TN_2000$pct_white <- round(cendat_TN_2000$P003003 / cendat_TN_2000$summary_value, 3) * 100 
+cendat_TN_1990$pct_white <- round(cendat_TN_1990$P0070001 / cendat_TN_1990$summary_value, 3) * 100 
+
+#### KNOXVILLE - Maps ####
+map_TN_2010 <- cendat_TN_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = pal_all, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
+
+#### SEATTLE - Pulls and Cleaning ####
+countylist_WA <- c('King', 'Snohomish', 'Kitsap', 'Island')
+
+cendat_WA_2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Washington', county = countylist_WA)
+
+cendat_WA_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Washington', county = countylist_WA)
+
+cendat_WA_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Washington', county = countylist_WA)
+
+# Changing to %
+cendat_WA_2010$pct_white <- round(cendat_WA_2010$P010003 / cendat_WA_2010$summary_value, 3) * 100 
+cendat_WA_2000$pct_white <- round(cendat_WA_2000$P003003 / cendat_WA_2000$summary_value, 3) * 100 
+cendat_WA_1990$pct_white <- round(cendat_WA_1990$P0070001 / cendat_WA_1990$summary_value, 3) * 100 
+
+#### SEATTLE - Maps ####
+map_WA_2010 <- cendat_WA_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = pal_all, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
+
+#### DETROIT - Pulls and Cleaning ####
+countylist_MI <- c('Oakland', 'Macomb', 'Wayne')
+
+cendat_MI_2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Michigan', county = countylist_MI)
+
+cendat_MI_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Michigan', county = countylist_MI)
+
+cendat_MI_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Michigan', county = countylist_MI)
+
+# Changing to %
+cendat_MI_2010$pct_white <- round(cendat_MI_2010$P010003 / cendat_MI_2010$summary_value, 3) * 100 
+cendat_MI_2000$pct_white <- round(cendat_MI_2000$P003003 / cendat_MI_2000$summary_value, 3) * 100 
+cendat_MI_1990$pct_white <- round(cendat_MI_1990$P0070001 / cendat_MI_1990$summary_value, 3) * 100 
+
+#### DETROIT - Maps ####
+map_MI_2010 <- cendat_MI_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = pal_all, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
 
 #### join and compare percentage over time? ####
 
@@ -227,8 +386,8 @@ coord_sf(crs = 26914)
 # can't figure out why this is only creating one point
 ggplot(compare_pct, aes(x = GEOID, y = change)) + geom_bar()
 
-####save data ####
-save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, map_DC_1990, map_MA_2000, map_MA_2010, cendat_DC_1990, cendat_DC_2000, cendat_DC_2010, map_DC_1990, map_DC_2000, map_DC_2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
+#### save data ####
+save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, cendat_DC_1990, cendat_DC_2000, cendat_DC_2010, cendat_CA_1990, cendat_CA_2000, cendat_CA_2010, cendat_OR_1990, cendat_OR_2000, cendat_OR_2010, cendat_WA_1990, cendat_WA_2000, cendat_WA_2010, cendat_TN_1990, cendat_TN_2000, cendat_TN_2010, cendat_MI_1990, cendat_MI_2000, cendat_MI_2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
 
 
 
