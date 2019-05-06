@@ -387,7 +387,7 @@ coord_sf(crs = 26914)
 ggplot(compare_pct, aes(x = GEOID, y = change)) + geom_bar()
 
 #### save data ####
-save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, cendat_DC_1990, cendat_DC_2000, cendat_DC_2010, cendat_CA_1990, cendat_CA_2000, cendat_CA_2010, cendat_OR_1990, cendat_OR_2000, cendat_OR_2010, cendat_WA_1990, cendat_WA_2000, cendat_WA_2010, cendat_TN_1990, cendat_TN_2000, cendat_TN_2010, cendat_MI_1990, cendat_MI_2000, cendat_MI_2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
+save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, cendat_DC_1990, cendat_DC_2000, cendat_DC_2010, cendat_CA_1990, cendat_CA_2000, cendat_CA_2010, cendat_OR_1990, cendat_OR_2000, cendat_OR_2010, cendat_WA_1990, cendat_WA_2000, cendat_WA_2010, cendat_TN_1990, cendat_TN_2000, cendat_TN_2010, cendat_MI_1990, cendat_MI_2000, cendat_MI_2010, file = 'C:/Users/Erin/Documents/GitHub/finalproject/SavedData.Rdata')
 
 
 
