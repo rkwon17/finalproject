@@ -6,7 +6,7 @@ setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory
 
 library(magrittr)
 library(texreg)
-
+library (dplyr)
 library(tidycensus)
 library(ggplot2)
 library(ggmap)
@@ -87,9 +87,9 @@ census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreig
                               'population' = 'summary_est')
 
 #### mapping non-white percentage ####
-countylist <- c('Suffolk')
+countylist <- c('Suffolk', 'Norfolk', 'Middlesex')
 
-vars1990 <- c('P0070001')
+vars1990 <- c('P0070001', 'P0100001')
 cendat1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
 
 vars2000 <- c('P003003', 'P003004', 'P003001')
@@ -232,14 +232,14 @@ compare_pct <- right_join(sub_2010,sub_1990, by= "GEOID")
 compare_pct %<>% subset(!is.na(pct_white_2010)) 
 
 
-compare_pct$change <- compare_pct$pct_white - compare_pct$pct_white1990
+compare_pct$change <- compare_pct$pct_white_2010 - compare_pct$pct_white_1990
 
 ggplot(compare_pct, aes(fill = pct_white_2010, color = pct_white_2010)) +
   geom_sf()
 coord_sf(crs = 26914)
 
 # can't figure out why this is only creating one point
-ggplot(compare_pct, aes(x = "pct_white", y = "change")) + geom_point()
+ggplot(compare_pct, aes(x = GEOID, y = change)) + geom_bar()
 
 save(cendat1990, cendat2000, cendat2010, map1990, map2000, map2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
 
