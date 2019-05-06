@@ -1,4 +1,4 @@
-#### last updated: Kevin 5/4 3PM
+#### last updated: Kevin 5/6 11am
 
 #### set up ####
 rm(list = ls())
@@ -89,19 +89,21 @@ census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreig
 #### mapping non-white percentage ####
 countylist <- c('Suffolk', 'Norfolk', 'Middlesex')
 
-vars1990 <- c('P0070001', 'P0100001')
+vars1990 <- c('P0070001', 'P0100001', 'P0100002')
 cendat1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
 
 vars2000 <- c('P003003', 'P003004', 'P003001')
 cendat2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
 
-vars2010 <- c('P010003','P001001') #white alone, population total
-cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'Massachusetts', county = countylist)
+vars2010 <- c('P010003') #white alone, population total
+cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
 
 # Changing to Percentages 
-cendat2010$pct_white_2010 <- round(cendat2010$P010003 / cendat2010$P001001, 3) * 100 
+cendat2010$pct_white_2010 <- round(cendat2010$P010003 / cendat2010$summary_value, 3) * 100 
 cendat2000$pct_white_2000 <- round(cendat2000$P003003 / cendat2000$summary_value, 3) * 100 
 cendat1990$pct_white_1990 <- round(cendat1990$P0070001 / cendat1990$summary_value, 3) * 100 
+
+cendat1990$pct_black_1990 <- round(cendat1990$P0100002 / cendat1990$summary_value, 3) * 100 
 
 #### DC 2010 ####
 dc_cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'District of Columbia')
@@ -241,6 +243,7 @@ coord_sf(crs = 26914)
 # can't figure out why this is only creating one point
 ggplot(compare_pct, aes(x = GEOID, y = change)) + geom_bar()
 
+####save data ####
 save(cendat1990, cendat2000, cendat2010, map1990, map2000, map2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
 
 
