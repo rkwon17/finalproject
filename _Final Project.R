@@ -1,4 +1,5 @@
-#### last updated: Kevin 5/6 11am
+#### last update ####
+# Erin 5/6 3pm
 
 #### set up ####
 rm(list = ls())
@@ -6,14 +7,12 @@ setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory
 
 library(magrittr)
 library(texreg)
-library (dplyr)
+library(dplyr)
 library(tidycensus)
 library(ggplot2)
 library(ggmap)
 library(stringr)
 library(tidyverse)
-
-#map libraries - need these to load shapefile
 library(leaflet)
 library(htmltools)
 library(tigris)
@@ -22,14 +21,288 @@ library(gridExtra)
 library(sf)
 
 
-#### shapefile test - OLD ####
-lookup_code(state="MA",county="Suffolk")
-countylist <- c('17','25') #cambridge + boston (fips codes for suffolk + middlesex)
-shapefile <- tracts(state='25', county=countylist) #cambridge and boston
-plot(shapefile)
+#### prep for all maps ####
+vars1990 <- c('P0070001', 'P0100001', 'P0100002')
+vars2000 <- c('P003003', 'P003004', 'P003001')
+vars2010 <- c('P010003') #white alone, population total
+tag.map.title <- tags$style(HTML("
+                                 .leaflet-control.map-title { 
+                                 transform: translate(-50%,20%);
+                                 position: fixed !important;
+                                 left: 50%;
+                                 text-align: center;
+                                 padding-left: 10px; 
+                                 padding-right: 10px; 
+                                 background: rgba(255,255,255,0.75);
+                                 font-weight: bold;
+                                 font-size: 28px;
+                                 }
+                                 "))
 
-#### testing pulls - OLD ####
+title1990 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 1990 Census")) 
+title2000 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 2000 Census")) 
+title2010 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 2010 Census")) 
 
+#### BOSTON - Pulls and Cleaning ####
+countylist_MA <- c('Suffolk', 'Norfolk', 'Middlesex')
+
+cendat_MA_2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist_MA)
+
+cendat_MA_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist_MA)
+
+cendat_MA_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist_MA)
+
+# Changing to %
+cendat_MA_2010$pct_white <- round(cendat_MA_2010$P010003 / cendat_MA_2010$summary_value, 3) * 100 
+cendat_MA_2000$pct_white <- round(cendat_MA_2000$P003003 / cendat_MA_2000$summary_value, 3) * 100 
+cendat_MA_1990$pct_white <- round(cendat_MA_1990$P0070001 / cendat_MA_1990$summary_value, 3) * 100 
+
+cendat_MA_1990$pct_black <- round(cendat_MA_1990$P0100002 / cendat_MA_1990$summary_value, 3) * 100 
+
+#### BOSTON - Maps ####
+# MAP! 2010
+color_MA_2010 = colorNumeric(palette = "viridis", domain = cendat_MA_2010$pct_white)
+map_MA_2010 <- cendat_MA_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ color_MA_2010(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = color_MA_2010, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
+
+# MAP! 2000
+color_MA_2000 = colorNumeric(palette = "viridis", domain = cendat_MA_2000$pct_white)
+map_MA_2000 <- cendat_MA_2000 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ color_MA_2000(pct_white),
+              label = ~paste0(pct_white, "%, (", P003003, ")"))%>%
+  addLegend("bottomright", 
+            pal = color_MA_2000, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2000, position = "topleft", className = "map-title")
+
+# MAP! 1990
+color_MA_1990 = colorNumeric(palette = "viridis", domain = cendat_MA_1990$pct_white)
+map_MA_1990 <- cendat_MA_1990 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal1990(pct_white),
+              label = ~paste0(pct_white, "%, (", P0070001, ")")) %>%
+  addLegend("bottomright", 
+            pal = color_MA_1990, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title1990, position = "topleft", className = "map-title")
+
+# view maps
+map1990
+map2000
+map2010
+
+# view all leaflets together -- not sure why the titles don't all appear. ugh.
+leaflet_grid <- 
+  tagList(
+    tags$table(width = "100%",
+               tags$tr(
+                 tags$td(map1990),
+                 tags$td(map2000)),
+               tags$tr(
+                 tags$td(map2010))))
+browsable(leaflet_grid)
+
+
+#### DC - Pulls and Cleaning ####
+# pull data (no county necessary)
+cendat_DC_2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'District of Columbia')
+
+cendat_DC_2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'District of Columbia')
+
+cendat_DC_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'District of Columbia')
+
+# Change to %s
+cendat_DC_2010$pct_white <- round(cendat_DC_2010$P010003 / cendat_DC_2010$summary_value, 3) * 100 
+cendat_DC_2000$pct_white <- round(cendat_DC_2000$P003003 / cendat_DC_2000$summary_value, 3) * 100 
+cendat_DC_1990$pct_white <- round(cendat_DC_1990$P0070001 / cendat_DC_1990$summary_value, 3) * 100 
+
+#### DC - Maps ####
+# Map 2010
+color_DC_2010 = colorNumeric(palette = "viridis", domain = cendat_DC_2010$pct_white)
+map_DC_2010 <- cendat_DC_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ color_DC_2010(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = color_DC_2010, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2010, position = "topleft", className = "map-title")
+
+# Map 2000
+color_DC_2000 = colorNumeric(palette = "viridis", domain = cendat_DC_2000$pct_white)
+map_DC_2000 <- cendat_DC_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ color_DC_2000(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = color_DC_2000, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title2000, position = "topleft", className = "map-title")
+
+# Map 1990
+color_DC_1990 = colorNumeric(palette = "viridis", domain = cendat_DC_1990$pct_white)
+map_DC_1990 <- cendat_DC_2010 %>%
+  st_transform(crs = "+init=epsg:4326") %>%
+  leaflet(width = "100%") %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ color_DC_1990(pct_white),
+              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+  addLegend("bottomright", 
+            pal = color_DC_1990, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1) %>%
+  addControl(title1990, position = "topleft", className = "map-title")
+
+
+#### join and compare percentage over time? ####
+
+sub_1990 <- as.data.frame(cendat1990[, c('GEOID', 'pct_white')])
+sub_1990$geometry <- NULL
+sub_2010 <- as.data.frame(cendat2010[, c('GEOID', 'pct_white')])
+compare_pct <- right_join(sub_2010,sub_1990, by= "GEOID")
+compare_pct %<>% subset(!is.na(pct_white)) 
+
+
+compare_pct$change <- compare_pct$pct_white - compare_pct$pct_white
+
+ggplot(compare_pct, aes(fill = pct_white, color = pct_white)) +
+  geom_sf()
+coord_sf(crs = 26914)
+
+# can't figure out why this is only creating one point
+ggplot(compare_pct, aes(x = GEOID, y = change)) + geom_bar()
+
+####save data ####
+save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, map_DC_1990, map_MA_2000, map_MA_2010, cendat_DC_1990, cendat_DC_2000, cendat_DC_2010, map_DC_1990, map_DC_2000, map_DC_2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
+
+
+
+###----------rachel experimenting with permutation------------
+summary(cendat_MA_2000)  #variable of interest here: #03 
+summary(cendat_MA_1990)  
+#read csv files
+setwd("~/Desktop")
+year2000 <- read.csv("/Users/rachelkwon/Desktop/year2000.csv")
+year1990 <- read.csv("/Users/rachelkwon/Desktop/year1990.csv")
+dim(year1990)
+names(cendat_MA_2000)
+names(cendat_MA_1990)
+
+#merge year dataframes to cendat data 
+testing_cendat_MA_2000 <- merge(cendat_MA_2000,year2000)
+testing_cendat_MA_1990 <- merge(cendat_MA_2000,year1990)
+names(testing_cendat_MA_1990) %<>% str_replace_all('P0070001', 'whiteonly')
+names(testing_cendat_MA_2000) %<>% str_replace_all('P003003', 'whiteonly')
+
+sub_testing_cendat_MA_2000 <- as.data.frame(testing_cendat_MA_2000[,c('NAME','GEOID','whiteonly','year','summary_value')])
+sub_testing_cendat_MA_2000 <- subset(sub_testing_cendat_MA_2000,select=c(NAME,whiteonly,year,summary_value))
+sub_testing_cendat_MA_1990 <- as.data.frame(testing_cendat_MA_1990[,c('NAME','GEOID','whiteonly','year','summary_value')])
+sub_testing_cendat_MA_1990 <- subset(sub_testing_cendat_MA_1990,select=c(NAME,whiteonly,year,summary_value))
+summary(sub_testing_cendat_MA_1990)
+summary(sub_testing_cendat_MA_2000)
+#percentages of white/total in each census tract
+sub_testing_cendat_MA_2000$white_prop <- round(sub_testing_cendat_MA_2000$whiteonly / sub_testing_cendat_MA_2000$summary_value, 3) * 100
+sub_testing_cendat_MA_1990$white_prop <- round(sub_testing_cendat_MA_1990$whiteonly / sub_testing_cendat_MA_1990$summary_value, 3) * 100
+
+#sub_testing_cendat_MA_2000$geometry <- NULL
+#sub_testing_cendat_MA_1990$geometry <- NULL
+#merged 1990 and 2000 by year
+testing_MA_1990_2000 <- rbind(sub_testing_cendat_MA_1990,sub_testing_cendat_MA_2000)
+testing_MA_1990_2000$year %<>% factor(levels = c(1990, 2000), labels = c('1990', '2000'))
+table(testing_MA_1990_2000$year)
+#actual permutation starts now
+
+set.seed(1)
+#testing
+#resample year
+testing_MA_1990_2000$year_permuted <- sample(testing_MA_1990_2000$year)
+testing_MA_1990_2000[c('year', 'year_permuted')]
+#ttest
+t.test(whiteonly ~ year_permuted, testing_MA_1990_2000)
+R <- 10000
+mean_diffs <- rep(NA, R)
+#for loop for permuting
+for(i in 1:R){
+  testing_MA_1990_2000$year_permuted <- sample(testing_MA_1990_2000$year_permuted)
+  means <- tapply(testing_MA_1990_2000$whiteonly, testing_MA_1990_2000$year_permuted, mean)
+  mean_diffs[i] <- means['2000'] - means['1990']
+  if(i %% 1000 == 0) print(i)
+}
+means <- tapply(testing_MA_1990_2000$whiteonly, testing_MA_1990_2000$year, mean)
+observed_mean <- means['2000'] - means['1990']
+mean_diffs <- data.frame(mean_diffs = mean_diffs)
+#this graph is suspect - look at it later
+ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) # nothing special about our mean
+
+densities <- density(mean_diffs$mean_diffs)
+plot_dat <- data.frame(x = densities$x, y = densities$y)
+#density plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
+
+#symmetric plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
+
+
+
+#### OLD/ARCHIVE testing pulls - can these be deleted? ####
 # a list of all the ACS 2015 variables is stored here. https://api.census.gov/data/2015/acs/acs5/subject/variables.html
 vars <- data.frame(load_variables(2016, 'acs5')) # downloads a list of all variables from the 2016 ACS
 head(vars) # there are a LOT of options
@@ -85,235 +358,4 @@ cendat1990$test <- rowSums(cendat1990[,8:9])
 
 census_dat %<>% dplyr::rename('countyfips' = 'GEOID', 'county' = 'NAME', 'foreign_total' = 'B05006_001E', 'recent_total' = 'B05007_002E',
                               'population' = 'summary_est')
-
-#### mapping non-white percentage ####
-countylist <- c('Suffolk', 'Norfolk', 'Middlesex')
-
-vars1990 <- c('P0070001', 'P0100001', 'P0100002')
-cendat1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist)
-
-vars2000 <- c('P003003', 'P003004', 'P003001')
-cendat2000 <- get_decennial(geography = "tract", variables = vars2000, year = 2000, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
-
-vars2010 <- c('P010003') #white alone, population total
-cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P001001', state= 'Massachusetts', county = countylist)
-
-# Changing to Percentages 
-cendat2010$pct_white_2010 <- round(cendat2010$P010003 / cendat2010$summary_value, 3) * 100 
-cendat2000$pct_white_2000 <- round(cendat2000$P003003 / cendat2000$summary_value, 3) * 100 
-cendat1990$pct_white_1990 <- round(cendat1990$P0070001 / cendat1990$summary_value, 3) * 100 
-
-cendat1990$pct_black_1990 <- round(cendat1990$P0100002 / cendat1990$summary_value, 3) * 100 
-
-#### DC 2010 ####
-dc_cendat2010 <- get_decennial(geography = "tract", variables = vars2010, year = 2010, geometry = TRUE, output = 'wide', shift_geo = FALSE, state= 'District of Columbia')
-
-dc_cendat2010$pct_white_2010 <- round(dc_cendat2010$P010003 / dc_cendat2010$P001001, 3) * 100 
-
-dc_pal2010 = colorNumeric(palette = "viridis", domain = dc_cendat2010$pct_white_2010)
-dc_map2010 <- dc_cendat2010 %>%
-  st_transform(crs = "+init=epsg:4326") %>%
-  leaflet(width = "100%") %>%
-  addProviderTiles(provider = "CartoDB.Positron") %>%
-  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
-              stroke = FALSE,
-              smoothFactor = 0,
-              fillOpacity = 0.5,
-              color = ~ dc_pal2010(pct_white_2010),
-              label = ~paste0(pct_white_2010, "%, (", P010003, ")")) %>%
-  addLegend("bottomright", 
-            pal = dc_pal2010, 
-            values = ~ pct_white_2010,
-            title = "Census Tract Pct White",
-            opacity = 1) %>%
-  addControl(title2010, position = "topleft", className = "map-title")
-
-# Leaflet prep
-tag.map.title <- tags$style(HTML("
-  .leaflet-control.map-title { 
-                                 transform: translate(-50%,20%);
-                                 position: fixed !important;
-                                 left: 50%;
-                                 text-align: center;
-                                 padding-left: 10px; 
-                                 padding-right: 10px; 
-                                 background: rgba(255,255,255,0.75);
-                                 font-weight: bold;
-                                 font-size: 28px;
-                                 }
-                                 "))
-
-title1990 <- tags$div(
-  tag.map.title, HTML("Racial Diversity: 1990 Census")) 
-title2000 <- tags$div(
-  tag.map.title, HTML("Racial Diversity: 2000 Census")) 
-title2010 <- tags$div(
-  tag.map.title, HTML("Racial Diversity: 2010 Census")) 
-
-# MAP! 2010
-pal2010 = colorNumeric(palette = "viridis", domain = cendat2010$pct_white_2010)
-map2010 <- cendat2010 %>%
-  st_transform(crs = "+init=epsg:4326") %>%
-  leaflet(width = "100%") %>%
-  addProviderTiles(provider = "CartoDB.Positron") %>%
-  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
-              stroke = FALSE,
-              smoothFactor = 0,
-              fillOpacity = 0.5,
-              color = ~ pal2010(pct_white_2010),
-              label = ~paste0(pct_white_2010, "%, (", P010003, ")")) %>%
-  addLegend("bottomright", 
-            pal = pal2010, 
-            values = ~ pct_white_2010,
-            title = "Census Tract Pct White",
-            opacity = 1) %>%
-  addControl(title2010, position = "topleft", className = "map-title")
-
-# MAP! 2000
-pal2000 = colorNumeric(palette = "viridis", domain = cendat2000$pct_white_2000)
-map2000 <- cendat2000 %>%
-  st_transform(crs = "+init=epsg:4326") %>%
-  leaflet(width = "100%") %>%
-  addProviderTiles(provider = "CartoDB.Positron") %>%
-  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
-              stroke = FALSE,
-              smoothFactor = 0,
-              fillOpacity = 0.5,
-              color = ~ pal2000(pct_white_2000),
-              label = ~paste0(pct_white_2000, "%, (", P003003, ")"))%>%
-  addLegend("bottomright", 
-            pal = pal2000, 
-            values = ~ pct_white_2000,
-            title = "Census Tract Pct White",
-            opacity = 1) %>%
-  addControl(title2000, position = "topleft", className = "map-title")
-
-# MAP! 1990
-pal1990 = colorNumeric(palette = "viridis", domain = cendat1990$pct_white_1990)
-map1990 <- cendat1990 %>%
-  st_transform(crs = "+init=epsg:4326") %>%
-  leaflet(width = "100%") %>%
-  addProviderTiles(provider = "CartoDB.Positron") %>%
-  addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
-              stroke = FALSE,
-              smoothFactor = 0,
-              fillOpacity = 0.5,
-              color = ~ pal1990(pct_white_1990),
-              label = ~paste0(pct_white_1990, "%, (", P0070001, ")")) %>%
-  addLegend("bottomright", 
-            pal = pal1990, 
-            values = ~ pct_white_1990,
-            title = "Census Tract Pct White",
-            opacity = 1) %>%
-  addControl(title1990, position = "topleft", className = "map-title")
-map1990
-map2000
-map2010
-
-# view all leaflets together -- not sure why the titles don't all appear. ugh.
-leaflet_grid <- 
-  tagList(
-    tags$table(width = "100%",
-               tags$tr(
-                 tags$td(map1990),
-                 tags$td(map2000)),
-               tags$tr(
-                 tags$td(map2010))))
-browsable(leaflet_grid)
-
-
-#P080A001 -- income?
-
-
-#### join and compare percentage over time? ####
-
-sub_1990 <- as.data.frame(cendat1990[, c('GEOID', 'pct_white_1990')])
-sub_1990$geometry <- NULL
-sub_2010 <- as.data.frame(cendat2010[, c('GEOID', 'pct_white_2010')])
-compare_pct <- right_join(sub_2010,sub_1990, by= "GEOID")
-compare_pct %<>% subset(!is.na(pct_white_2010)) 
-
-
-compare_pct$change <- compare_pct$pct_white_2010 - compare_pct$pct_white_1990
-
-ggplot(compare_pct, aes(fill = pct_white_2010, color = pct_white_2010)) +
-  geom_sf()
-coord_sf(crs = 26914)
-
-# can't figure out why this is only creating one point
-ggplot(compare_pct, aes(x = GEOID, y = change)) + geom_bar()
-
-####save data ####
-save(cendat1990, cendat2000, cendat2010, map1990, map2000, map2010, file = 'c:/Users/juggl_000/Documents/GitHub/finalproject/Final_project.Rdata')
-
-
-
-###----------rachel experimenting with permutation------------
-summary(test_cendat2000)  #variable of interest here: #03 
-summary(test_cendat1990)  
-#read csv files
-setwd("~/Desktop")
-year2000 <- read.csv("/Users/rachelkwon/Desktop/year2000.csv")
-year1990 <- read.csv("/Users/rachelkwon/Desktop/year1990.csv")
-dim(year1990)
-names(test_cendat2000)
-names(test_cendat1990)
-
-#merge year dataframes to cendat data 
-testing_cendat2000 <- merge(test_cendat2000,year2000)
-testing_cendat1990 <- merge(test_cendat1990,year1990)
-names(testing_cendat1990) %<>% str_replace_all('P0070001', 'whiteonly')
-names(testing_cendat2000) %<>% str_replace_all('P003003', 'whiteonly')
-
-sub_testing_cendat2000 <- as.data.frame(testing_cendat2000[,c('NAME','GEOID','whiteonly','year','summary_value')])
-sub_testing_cendat2000 <- subset(sub_testing_cendat2000,select=c(NAME,whiteonly,year,summary_value))
-sub_testing_cendat1990 <- as.data.frame(testing_cendat1990[,c('NAME','GEOID','whiteonly','year','summary_value')])
-sub_testing_cendat1990 <- subset(sub_testing_cendat1990,select=c(NAME,whiteonly,year,summary_value))
-summary(sub_testing_cendat1990)
-summary(sub_testing_cendat2000)
-#percentages of white/total in each census tract
-sub_testing_cendat2000$white_prop <- round(sub_testing_cendat2000$whiteonly / sub_testing_cendat2000$summary_value, 3) * 100
-sub_testing_cendat1990$white_prop <- round(sub_testing_cendat1990$whiteonly / sub_testing_cendat1990$summary_value, 3) * 100
-
-#sub_testing_cendat2000$geometry <- NULL
-#sub_testing_cendat1990$geometry <- NULL
-#merged 1990 and 2000 by year
-testing_1990_2000 <- rbind(sub_testing_cendat1990,sub_testing_cendat2000)
-testing_1990_2000$year %<>% factor(levels = c(1990, 2000), labels = c('1990', '2000'))
-table(testing_1990_2000$year)
-#actual permutation starts now
-
-set.seed(1)
-#testing
-#resample year
-testing_1990_2000$year_permuted <- sample(testing_1990_2000$year)
-testing_1990_2000[c('year', 'year_permuted')]
-#ttest
-t.test(whiteonly ~ year_permuted, testing_1990_2000)
-R <- 10000
-mean_diffs <- rep(NA, R)
-#for loop for permuting
-for(i in 1:R){
-  testing_1990_2000$year_permuted <- sample(testing_1990_2000$year_permuted)
-  means <- tapply(testing_1990_2000$whiteonly, testing_1990_2000$year_permuted, mean)
-  mean_diffs[i] <- means['2000'] - means['1990']
-  if(i %% 1000 == 0) print(i)
-}
-means <- tapply(testing_1990_2000$whiteonly, testing_1990_2000$year, mean)
-observed_mean <- means['2000'] - means['1990']
-mean_diffs <- data.frame(mean_diffs = mean_diffs)
-#this graph is suspect - look at it later
-ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) # nothing special about our mean
-
-densities <- density(mean_diffs$mean_diffs)
-plot_dat <- data.frame(x = densities$x, y = densities$y)
-#density plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
-
-#symmetric plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
-
 
