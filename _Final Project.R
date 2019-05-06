@@ -265,12 +265,16 @@ testing_cendat1990 <- merge(test_cendat1990,year1990)
 names(testing_cendat1990) %<>% str_replace_all('P0070001', 'whiteonly')
 names(testing_cendat2000) %<>% str_replace_all('P003003', 'whiteonly')
 
-sub_testing_cendat2000 <- as.data.frame(testing_cendat2000[,c('NAME','GEOID','whiteonly','year')])
-sub_testing_cendat2000 <- subset(sub_testing_cendat2000,select=c(NAME,whiteonly,year))
-sub_testing_cendat1990 <- as.data.frame(testing_cendat1990[,c('NAME','GEOID','whiteonly','year')])
-sub_testing_cendat1990 <- subset(sub_testing_cendat1990,select=c(NAME,whiteonly,year))
+sub_testing_cendat2000 <- as.data.frame(testing_cendat2000[,c('NAME','GEOID','whiteonly','year','summary_value')])
+sub_testing_cendat2000 <- subset(sub_testing_cendat2000,select=c(NAME,whiteonly,year,summary_value))
+sub_testing_cendat1990 <- as.data.frame(testing_cendat1990[,c('NAME','GEOID','whiteonly','year','summary_value')])
+sub_testing_cendat1990 <- subset(sub_testing_cendat1990,select=c(NAME,whiteonly,year,summary_value))
 summary(sub_testing_cendat1990)
 summary(sub_testing_cendat2000)
+#percentages of white/total in each census tract
+sub_testing_cendat2000$white_prop <- round(sub_testing_cendat2000$whiteonly / sub_testing_cendat2000$summary_value, 3) * 100
+sub_testing_cendat1990$white_prop <- round(sub_testing_cendat1990$whiteonly / sub_testing_cendat1990$summary_value, 3) * 100
+
 #sub_testing_cendat2000$geometry <- NULL
 #sub_testing_cendat1990$geometry <- NULL
 #merged 1990 and 2000 by year
