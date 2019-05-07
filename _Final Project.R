@@ -1,5 +1,5 @@
 #### last update ####
-# Erin 5/6 5pm
+# Erin 5/7 10:30am
 
 #### set up ####
 rm(list = ls())
@@ -22,9 +22,9 @@ library(sf)
 
 
 #### prep for all maps ####
-vars1990 <- c('P0070001', 'P0100001')
-vars2000 <- c('P003003', 'P003004', 'P003001')
-vars2010 <- c('P010003') #white alone, population total
+vars1990 <- c('P0100001') #white non-hispanic
+vars2000 <- c('P004005') #white non-hispanic
+vars2010 <- c('P005003') #white non-hispanic
 pal_all = colorNumeric(palette = "viridis", domain = c(0, 100))
 tag.map.title <- tags$style(HTML("
                                  .leaflet-control.map-title { 
