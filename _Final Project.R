@@ -419,62 +419,86 @@ save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, cendat_DC_1990, cendat_DC_2
 
 
 ###----------rachel experimenting with permutation------------
-summary(cendat_MA_2000)  #variable of interest here: #03 
-summary(cendat_MA_1990)  
-#read csv files
+#read csv files for year csv files
 setwd("~/Desktop")
 year2000 <- read.csv("/Users/rachelkwon/Desktop/year2000.csv")
 year1990 <- read.csv("/Users/rachelkwon/Desktop/year1990.csv")
+year2010 <- read.csv("/Users/rachelkwon/Desktop/year2010.csv")
 dim(year1990)
-names(cendat_MA_2000)
-names(cendat_MA_1990)
+dim(year2000)
+dim(year2010)
+dim(cendat_MA_2010)
+dim(cendat_MA_1990)
+dim(cendat_MA_2000)
 
 #merge year dataframes to cendat data 
-testing_cendat_MA_2000 <- merge(cendat_MA_2000,year2000)
-testing_cendat_MA_1990 <- merge(cendat_MA_2000,year1990)
-names(testing_cendat_MA_1990) %<>% str_replace_all('P0070001', 'whiteonly')
-names(testing_cendat_MA_2000) %<>% str_replace_all('P003003', 'whiteonly')
+###------convert everything to dataframes for permutation tests-----------
+year2000 <- as.data.frame(year2000)
+year1990 <- as.data.frame(year1990)
+year2010 <- as.data.frame(year2010)
+cendat_MA_1990 <- as.data.frame(cendat_MA_1990)
+cendat_MA_2000 <- as.data.frame(cendat_MA_2000)
+cendat_MA_2010 <- as.data.frame(cendat_MA_2010)
+testing_cendat_MA_2000 <- cbind(cendat_MA_2000,year2000)
+testing_cendat_MA_1990 <- cbind(cendat_MA_1990,year1990)
+testing_cendat_MA_2010 <- cbind(cendat_MA_2010,year2010)
+#names(testing_cendat_MA_1990) %<>% str_replace_all('P0070001', 'whiteonly')
+#names(testing_cendat_MA_2000) %<>% str_replace_all('P003003', 'whiteonly')
 
-sub_testing_cendat_MA_2000 <- as.data.frame(testing_cendat_MA_2000[,c('NAME','GEOID','whiteonly','year','summary_value')])
-sub_testing_cendat_MA_2000 <- subset(sub_testing_cendat_MA_2000,select=c(NAME,whiteonly,year,summary_value))
-sub_testing_cendat_MA_1990 <- as.data.frame(testing_cendat_MA_1990[,c('NAME','GEOID','whiteonly','year','summary_value')])
-sub_testing_cendat_MA_1990 <- subset(sub_testing_cendat_MA_1990,select=c(NAME,whiteonly,year,summary_value))
+#subsetting dataframes for permutation testing-----------------------------------
+sub_testing_cendat_MA_2000 <- as.data.frame(testing_cendat_MA_2000[,c('NAME','GEOID','year','pct_white')])
+sub_testing_cendat_MA_2000 <- subset(sub_testing_cendat_MA_2000,select=c(NAME,GEOID,year,pct_white))
+sub_testing_cendat_MA_1990 <- as.data.frame(testing_cendat_MA_1990[,c('NAME','GEOID','year','pct_white')])
+sub_testing_cendat_MA_1990 <- subset(sub_testing_cendat_MA_1990,select=c(NAME,GEOID,year,pct_white))
+
+sub_testing_cendat_MA_2010 <- as.data.frame(testing_cendat_MA_2010[,c('NAME','GEOID','year','pct_white')])
+sub_testing_cendat_MA_2010 <- subset(sub_testing_cendat_MA_2010,select=c(NAME,GEOID,year,pct_white))
 summary(sub_testing_cendat_MA_1990)
 summary(sub_testing_cendat_MA_2000)
-#percentages of white/total in each census tract
-sub_testing_cendat_MA_2000$white_prop <- round(sub_testing_cendat_MA_2000$whiteonly / sub_testing_cendat_MA_2000$summary_value, 3) * 100
-sub_testing_cendat_MA_1990$white_prop <- round(sub_testing_cendat_MA_1990$whiteonly / sub_testing_cendat_MA_1990$summary_value, 3) * 100
+summary(sub_testing_cendat_MA_2010) #5NA's
 
 #sub_testing_cendat_MA_2000$geometry <- NULL
 #sub_testing_cendat_MA_1990$geometry <- NULL
+
+
+###-----prepping for 3 permutations-----------------------------------------------------------
 #merged 1990 and 2000 by year
 testing_MA_1990_2000 <- rbind(sub_testing_cendat_MA_1990,sub_testing_cendat_MA_2000)
 testing_MA_1990_2000$year %<>% factor(levels = c(1990, 2000), labels = c('1990', '2000'))
 table(testing_MA_1990_2000$year)
-#actual permutation starts now
 
+#merged 2000 and 2010 by year
+testing_MA_2000_2010 <- rbind(sub_testing_cendat_MA_2000,sub_testing_cendat_MA_2010)
+testing_MA_2000_2010$year %<>% factor(levels = c(2000, 2010), labels = c('2000', '2010'))
+
+#merged 1990 and 2010 by year
+testing_MA_1990_2010 <- rbind(sub_testing_cendat_MA_1990,sub_testing_cendat_MA_2010)
+testing_MA_1990_2010$year %<>% factor(levels = c(1990, 2010), labels = c('1990', '2010'))
+
+#actual permutation starts now
+####-for loop for 1990-2000 ------------------------------------------------------------------------
 set.seed(1)
 #testing
 #resample year
 testing_MA_1990_2000$year_permuted <- sample(testing_MA_1990_2000$year)
 testing_MA_1990_2000[c('year', 'year_permuted')]
 #ttest
-t.test(whiteonly ~ year_permuted, testing_MA_1990_2000)
+t.test(pct_white ~ year_permuted, testing_MA_1990_2000)
 R <- 10000
 mean_diffs <- rep(NA, R)
 #for loop for permuting
 for(i in 1:R){
   testing_MA_1990_2000$year_permuted <- sample(testing_MA_1990_2000$year_permuted)
-  means <- tapply(testing_MA_1990_2000$whiteonly, testing_MA_1990_2000$year_permuted, mean)
+  means <- tapply(testing_MA_1990_2000$pct_white, testing_MA_1990_2000$year_permuted, mean,na.rm=TRUE)
   mean_diffs[i] <- means['2000'] - means['1990']
   if(i %% 1000 == 0) print(i)
 }
-means <- tapply(testing_MA_1990_2000$whiteonly, testing_MA_1990_2000$year, mean)
+means <- tapply(testing_MA_1990_2000$pct_white, testing_MA_1990_2000$year, mean,na.rm=TRUE)
 observed_mean <- means['2000'] - means['1990']
 mean_diffs <- data.frame(mean_diffs = mean_diffs)
-#this graph is suspect - look at it later
-ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) # nothing special about our mean
-
+#distibution of mean diffs 
+plot1 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2000 census")
+plot1
 densities <- density(mean_diffs$mean_diffs)
 plot_dat <- data.frame(x = densities$x, y = densities$y)
 #density plot
@@ -486,6 +510,72 @@ ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot
   geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
   geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
 
+###---permutation for 2000-2010-------------------------------------------------------
+set.seed(1)
+testing_MA_2000_2010$year_permuted <- sample(testing_MA_2000_2010$year)
+testing_MA_2000_2010[c('year', 'year_permuted')]
+#ttest
+t.test(pct_white ~ year_permuted, testing_MA_2000_2010)
+R <- 10000
+mean_diffs <- rep(NA, R)
+#for loop for permuting
+for(i in 1:R){
+  testing_MA_2000_2010$year_permuted <- sample(testing_MA_2000_2010$year_permuted)
+  means <- tapply(testing_MA_2000_2010$pct_white, testing_MA_2000_2010$year_permuted, mean,na.rm=TRUE)
+  mean_diffs[i] <- means['2010'] - means['2000']
+  if(i %% 1000 == 0) print(i)
+}
+means <- tapply(testing_MA_2000_2010$pct_white, testing_MA_2000_2010$year, mean,na.rm=TRUE)
+observed_mean <- means['2010'] - means['2000']
+mean_diffs <- data.frame(mean_diffs = mean_diffs)
+#this graph is suspect - look at it later
+plot2 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 2000 & 2010 census")
+plot2
+densities <- density(mean_diffs$mean_diffs)
+plot_dat <- data.frame(x = densities$x, y = densities$y)
+#density plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
+
+#symmetric plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
+
+
+
+###---permutation for 1990-2010-------------------------------------------------------
+set.seed(1)
+testing_MA_1990_2010$year_permuted <- sample(testing_MA_1990_2010$year)
+testing_MA_1990_2010[c('year', 'year_permuted')]
+#ttest
+t.test(pct_white ~ year_permuted, testing_MA_1990_2010)
+R <- 10000
+mean_diffs <- rep(NA, R)
+#for loop for permuting
+for(i in 1:R){
+  testing_MA_1990_2010$year_permuted <- sample(testing_MA_1990_2010$year_permuted)
+  means <- tapply(testing_MA_1990_2010$pct_white, testing_MA_1990_2010$year_permuted, mean,na.rm=TRUE)
+  mean_diffs[i] <- means['2010'] - means['1990']
+  if(i %% 1000 == 0) print(i)
+}
+means <- tapply(testing_MA_1990_2010$pct_white, testing_MA_1990_2010$year, mean,na.rm=TRUE)
+observed_mean <- means['2010'] - means['1990']
+mean_diffs <- data.frame(mean_diffs = mean_diffs)
+#plot
+plot3 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2010 census")
+plot3
+
+densities <- density(mean_diffs$mean_diffs)
+plot_dat <- data.frame(x = densities$x, y = densities$y)
+#density plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
+
+#symmetric plot
+ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
+  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
 
 
 #### OLD/ARCHIVE testing pulls - can these be deleted? ####
