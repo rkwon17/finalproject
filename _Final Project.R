@@ -1,5 +1,5 @@
 #### last update ####
-# Erin 5/6 5pm
+# Erin 5/7 10:30am
 
 #### set up ####
 rm(list = ls())
@@ -22,9 +22,9 @@ library(sf)
 
 
 #### prep for all maps ####
-vars1990 <- c('P0070001', 'P0100001')
-vars2000 <- c('P003003', 'P003004', 'P003001')
-vars2010 <- c('P010003') #white alone, population total
+vars1990 <- c('P0100001') #white non-hispanic
+vars2000 <- c('P004005') #white non-hispanic
+vars2010 <- c('P005003') #white non-hispanic
 pal_all = colorNumeric(palette = "viridis", domain = c(0, 100))
 tag.map.title <- tags$style(HTML("
                                  .leaflet-control.map-title { 
@@ -57,11 +57,9 @@ cendat_MA_2000 <- get_decennial(geography = "tract", variables = vars2000, year 
 cendat_MA_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Massachusetts', county = countylist_MA)
 
 # Changing to %
-cendat_MA_2010$pct_white <- round(cendat_MA_2010$P010003 / cendat_MA_2010$summary_value, 3) * 100 
-cendat_MA_2000$pct_white <- round(cendat_MA_2000$P003003 / cendat_MA_2000$summary_value, 3) * 100 
-cendat_MA_1990$pct_white <- round(cendat_MA_1990$P0070001 / cendat_MA_1990$summary_value, 3) * 100 
-
-cendat_MA_1990$pct_black <- round(cendat_MA_1990$P0100002 / cendat_MA_1990$summary_value, 3) * 100 
+cendat_MA_2010$pct_white <- round(cendat_MA_2010$P005003 / cendat_MA_2010$summary_value, 3) * 100 
+cendat_MA_2000$pct_white <- round(cendat_MA_2000$P004005 / cendat_MA_2000$summary_value, 3) * 100 
+cendat_MA_1990$pct_white <- round(cendat_MA_1990$P0100001 / cendat_MA_1990$summary_value, 3) * 100 
 
 #### BOSTON - Maps ####
 # MAP! 2010
@@ -74,7 +72,7 @@ map_MA_2010 <- cendat_MA_2010 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P005003, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -92,7 +90,7 @@ map_MA_2000 <- cendat_MA_2000 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P003003, ")"))%>%
+              label = ~paste0(pct_white, "%, (", P004005, ")"))%>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -110,7 +108,7 @@ map_MA_1990 <- cendat_MA_1990 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P0070001, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P0100001, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -144,9 +142,9 @@ cendat_DC_2000 <- get_decennial(geography = "tract", variables = vars2000, year 
 cendat_DC_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'District of Columbia') #this gives errors!!!
 
 # Change to %s
-cendat_DC_2010$pct_white <- round(cendat_DC_2010$P010003 / cendat_DC_2010$summary_value, 3) * 100 
-cendat_DC_2000$pct_white <- round(cendat_DC_2000$P003003 / cendat_DC_2000$summary_value, 3) * 100 
-cendat_DC_1990$pct_white <- round(cendat_DC_1990$P0070001 / cendat_DC_1990$summary_value, 3) * 100 
+cendat_DC_2010$pct_white <- round(cendat_DC_2010$P005003 / cendat_DC_2010$summary_value, 3) * 100 
+cendat_DC_2000$pct_white <- round(cendat_DC_2000$P004005 / cendat_DC_2000$summary_value, 3) * 100 
+cendat_DC_1990$pct_white <- round(cendat_DC_1990$P0100001 / cendat_DC_1990$summary_value, 3) * 100 
 
 #### DC - Maps ####
 # Map 2010
@@ -159,7 +157,7 @@ map_DC_2010 <- cendat_DC_2010 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P005003, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -177,7 +175,7 @@ map_DC_2000 <- cendat_DC_2000 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P003003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P004005, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -195,7 +193,7 @@ map_DC_1990 <- cendat_DC_1990 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P0070001, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P0100001, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -217,9 +215,9 @@ cendat_CA_2000 <- get_decennial(geography = "tract", variables = vars2000, year 
 cendat_CA_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'California', county = countylist_CA)
 
 # Changing to %
-cendat_CA_2010$pct_white <- round(cendat_CA_2010$P010003 / cendat_CA_2010$summary_value, 3) * 100 
-cendat_CA_2000$pct_white <- round(cendat_CA_2000$P003003 / cendat_CA_2000$summary_value, 3) * 100 
-cendat_CA_1990$pct_white <- round(cendat_CA_1990$P0070001 / cendat_CA_1990$summary_value, 3) * 100 
+cendat_CA_2010$pct_white <- round(cendat_CA_2010$P005003 / cendat_CA_2010$summary_value, 3) * 100 
+cendat_CA_2000$pct_white <- round(cendat_CA_2000$P004005 / cendat_CA_2000$summary_value, 3) * 100 
+cendat_CA_1990$pct_white <- round(cendat_CA_1990$P0100001 / cendat_CA_1990$summary_value, 3) * 100 
 
 #### OAKLAND - Maps ####
 map_CA_2010 <- cendat_CA_2010 %>%
@@ -231,7 +229,7 @@ map_CA_2010 <- cendat_CA_2010 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P005003, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -250,9 +248,9 @@ cendat_OR_2000 <- get_decennial(geography = "tract", variables = vars2000, year 
 cendat_OR_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Oregon', county = countylist_OR)
 
 # Changing to %
-cendat_OR_2010$pct_white <- round(cendat_OR_2010$P010003 / cendat_OR_2010$summary_value, 3) * 100 
-cendat_OR_2000$pct_white <- round(cendat_OR_2000$P003003 / cendat_OR_2000$summary_value, 3) * 100 
-cendat_OR_1990$pct_white <- round(cendat_OR_1990$P0070001 / cendat_OR_1990$summary_value, 3) * 100 
+cendat_OR_2010$pct_white <- round(cendat_OR_2010$P005003 / cendat_OR_2010$summary_value, 3) * 100 
+cendat_OR_2000$pct_white <- round(cendat_OR_2000$P004005 / cendat_OR_2000$summary_value, 3) * 100 
+cendat_OR_1990$pct_white <- round(cendat_OR_1990$P0100001 / cendat_OR_1990$summary_value, 3) * 100 
 
 #### PORTLAND - Maps ####
 map_OR_2010 <- cendat_OR_2010 %>%
@@ -264,7 +262,7 @@ map_OR_2010 <- cendat_OR_2010 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P005003, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -282,9 +280,9 @@ cendat_TN_2000 <- get_decennial(geography = "tract", variables = vars2000, year 
 cendat_TN_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Tennessee', county = countylist_TN)
 
 # Changing to %
-cendat_TN_2010$pct_white <- round(cendat_TN_2010$P010003 / cendat_TN_2010$summary_value, 3) * 100 
-cendat_TN_2000$pct_white <- round(cendat_TN_2000$P003003 / cendat_TN_2000$summary_value, 3) * 100 
-cendat_TN_1990$pct_white <- round(cendat_TN_1990$P0070001 / cendat_TN_1990$summary_value, 3) * 100 
+cendat_TN_2010$pct_white <- round(cendat_TN_2010$P005003 / cendat_TN_2010$summary_value, 3) * 100 
+cendat_TN_2000$pct_white <- round(cendat_TN_2000$P004005 / cendat_TN_2000$summary_value, 3) * 100 
+cendat_TN_1990$pct_white <- round(cendat_TN_1990$P0100001 / cendat_TN_1990$summary_value, 3) * 100 
 
 #### KNOXVILLE - Maps ####
 map_TN_2010 <- cendat_TN_2010 %>%
@@ -296,7 +294,7 @@ map_TN_2010 <- cendat_TN_2010 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P005003, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -314,9 +312,9 @@ cendat_WA_2000 <- get_decennial(geography = "tract", variables = vars2000, year 
 cendat_WA_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Washington', county = countylist_WA)
 
 # Changing to %
-cendat_WA_2010$pct_white <- round(cendat_WA_2010$P010003 / cendat_WA_2010$summary_value, 3) * 100 
-cendat_WA_2000$pct_white <- round(cendat_WA_2000$P003003 / cendat_WA_2000$summary_value, 3) * 100 
-cendat_WA_1990$pct_white <- round(cendat_WA_1990$P0070001 / cendat_WA_1990$summary_value, 3) * 100 
+cendat_WA_2010$pct_white <- round(cendat_WA_2010$P005003 / cendat_WA_2010$summary_value, 3) * 100 
+cendat_WA_2000$pct_white <- round(cendat_WA_2000$P004005 / cendat_WA_2000$summary_value, 3) * 100 
+cendat_WA_1990$pct_white <- round(cendat_WA_1990$P0100001 / cendat_WA_1990$summary_value, 3) * 100 
 
 #### SEATTLE - Maps ####
 map_WA_2010 <- cendat_WA_2010 %>%
@@ -328,7 +326,7 @@ map_WA_2010 <- cendat_WA_2010 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P005003, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -346,9 +344,9 @@ cendat_MI_2000 <- get_decennial(geography = "tract", variables = vars2000, year 
 cendat_MI_1990 <- get_decennial(geography = "tract", variables = vars1990, year = 1990, geometry = TRUE, output = 'wide', shift_geo = FALSE, summary_var = 'P0010001', state= 'Michigan', county = countylist_MI)
 
 # Changing to %
-cendat_MI_2010$pct_white <- round(cendat_MI_2010$P010003 / cendat_MI_2010$summary_value, 3) * 100 
-cendat_MI_2000$pct_white <- round(cendat_MI_2000$P003003 / cendat_MI_2000$summary_value, 3) * 100 
-cendat_MI_1990$pct_white <- round(cendat_MI_1990$P0070001 / cendat_MI_1990$summary_value, 3) * 100 
+cendat_MI_2010$pct_white <- round(cendat_MI_2010$P005003 / cendat_MI_2010$summary_value, 3) * 100 
+cendat_MI_2000$pct_white <- round(cendat_MI_2000$P004005 / cendat_MI_2000$summary_value, 3) * 100 
+cendat_MI_1990$pct_white <- round(cendat_MI_1990$P0100001 / cendat_MI_1990$summary_value, 3) * 100 
 
 #### DETROIT - Maps ####
 map_MI_2010 <- cendat_MI_2010 %>%
@@ -360,7 +358,7 @@ map_MI_2010 <- cendat_MI_2010 %>%
               smoothFactor = 0,
               fillOpacity = 0.5,
               color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", P010003, ")")) %>%
+              label = ~paste0(pct_white, "%, (", P005003, ")")) %>%
   addLegend("bottomright", 
             pal = pal_all, 
             values = ~ pct_white,
@@ -405,8 +403,8 @@ names(cendat_MA_1990)
 #merge year dataframes to cendat data 
 testing_cendat_MA_2000 <- merge(cendat_MA_2000,year2000)
 testing_cendat_MA_1990 <- merge(cendat_MA_2000,year1990)
-names(testing_cendat_MA_1990) %<>% str_replace_all('P0070001', 'whiteonly')
-names(testing_cendat_MA_2000) %<>% str_replace_all('P003003', 'whiteonly')
+names(testing_cendat_MA_1990) %<>% str_replace_all('P0100001', 'whiteonly')
+names(testing_cendat_MA_2000) %<>% str_replace_all('P004005', 'whiteonly')
 
 sub_testing_cendat_MA_2000 <- as.data.frame(testing_cendat_MA_2000[,c('NAME','GEOID','whiteonly','year','summary_value')])
 sub_testing_cendat_MA_2000 <- subset(sub_testing_cendat_MA_2000,select=c(NAME,whiteonly,year,summary_value))
