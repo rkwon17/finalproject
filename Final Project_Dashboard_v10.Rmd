@@ -142,15 +142,15 @@ Column
 (map2<- renderLeaflet({                 
   
     tmp_left <- get(paste('cendat_',input$cities_compare,"_",input$year_left, sep = ""))
-    pct_white <- tmp_left$pct_white   
+    pct_white_left <- tmp_left$pct_white   
     pal_all = colorNumeric(palette = input$palette2, domain = c(0,100))
   
   if (input$year_left == 1990){
-  num_white <- 'P0070001'
+    num_white_left  <- tmp_left$P0070001
 } else if (input$year_left ==2000){
-  num_white <- 'P003003'
-}else{
-  num_white <-'P003002'
+    num_white_left <- tmp_left$P003003
+} else{
+    num_white_left <-tmp_left$P003002 # 2010 
 }
   
   if(nrow(tmp_left) >= 1){
@@ -161,11 +161,11 @@ Column
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ pal_all(pct_white),
-              label = ~paste0(pct_white, "%, (", num_white, ")")) %>%
+              color = ~ pal_all(pct_white_left),
+              label = ~paste0(pct_white_left, "%, (", num_white_left, ")")) %>%
     addLegend("bottomright", 
             pal = pal_all, 
-            values = ~ pct_white,
+            values = c(0,100),
             title = "Census Tract Pct White",
             opacity = 1)
   } else leaflet()
@@ -183,15 +183,15 @@ Column
 (map3<- renderLeaflet({                 
 
     tmp_right <- get(paste('cendat_',input$cities_compare,"_",input$year_right, sep = ""))
-    pct_white2 <- tmp_right$pct_white   
+    pct_white_right <- tmp_right$pct_white   
     pal_all2 = colorNumeric(palette = input$palette2, domain = c(0,100))
 
   if (input$year_right == 1990){
-  num_white2 <- 'P0070001'
+    num_white_right  <- tmp_right$P0070001
 } else if (input$year_right ==2000){
-  num_white2 <- 'P003003'
-}else{
-  num_white2 <-'P003002'
+    num_white_right <- tmp_right$P003003
+} else{
+    num_white_right <-tmp_right$P003002 # 2010 
 }
  
   if(nrow(tmp_right) >= 1){
@@ -202,11 +202,11 @@ Column
               stroke = FALSE,
               smoothFactor = 0,
               fillOpacity = 0.5,
-              color = ~ pal_all2(pct_white2),
-              label = ~paste0(pct_white2, "%, (", num_white2, ")")) %>%
+              color = ~ pal_all2(pct_white_right),
+              label = ~paste0(pct_white_right, "%, (", num_white_right, ")")) %>%
     addLegend("bottomright", 
             pal = pal_all2, 
-            values = ~ pct_white2,
+            values = c(0,100),
             title = "Census Tract Pct White",
             opacity = 1)
   } else leaflet()
