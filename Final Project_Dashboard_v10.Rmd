@@ -1,0 +1,216 @@
+---
+title: "Is there evidence of White Flight in Boston over the last 20 years?"
+author: Rachel Kwon, Erin Mahoney, & Kevin Nazario
+output: 
+  flexdashboard::flex_dashboard:
+    theme: yeti
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard) # for the dashboard
+library(shiny)
+library(magrittr)
+library(texreg)
+
+library(tidycensus)
+library(stringr)
+library(tidyverse)
+library(RColorBrewer)
+
+#map libraries - need these to load shapefile
+library(leaflet)
+library(htmltools)
+library(tigris)
+library(sf)
+load('c:/Users/juggl_000/Documents/GitHub/finalproject/SavedData.Rdata') # load data
+
+color_choices <- c("Viridis"= "viridis", "Magma"="magma", "Plasma"="plasma", "Inferno"="inferno", "Spectral"= "Spectral", "Red-Yellow-Blue"= "RdYlBu", "Blues"= "Blues", "Random"= "Set1")
+
+cities <- c('Boston, MA'='MA', 'D.C.' = 'DC', 'Oakland, CA'= 'CA', 'Seattle, WA' = 'WA', 'Portland, OR'= 'OR', 'Knoxville, TN'= 'TN', 'Detroit, MI' = 'MI') 
+
+```
+
+Maps{data-orientation=rows}
+=====================================
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+### Visualizing Change in White population over time
+
+```{r}
+selectInput("cities", "Choose a city:",
+      choices = cities, 
+      selected = cities[1])
+
+selectInput("year", "Choose a year:",
+      c('1990', '2000', '2010'), 
+      selected = '1990')
+
+selectInput("palette", "Choose a color palette:",
+            choices = color_choices, selected = color_choices[1])
+
+
+
+```
+
+Row {data-height = 500}
+-----------------------------------------------------------------------
+
+### Map
+```{r} 
+(map1<- renderLeaflet({                 
+  
+  tmp <- get(paste('cendat_',input$cities,"_",input$year, sep = ""))
+  pct_white <- tmp$pct_white
+  
+  if (input$year == 1990){
+  num_white <- tmp$P0070001
+} else if (input$year ==2000){
+  num_white <- tmp$P003003
+}else{
+  num_white <-tmp$P003002 # 2010
+}
+ 
+   pal_all = colorNumeric(palette = input$palette, domain = c(0,100))
+ 
+  
+  if(nrow(tmp) >= 1){
+    tmp %>% st_transform(crs = "+init=epsg:4326")%>%
+    leaflet(height = '100%') %>%  
+    addProviderTiles(provider = "CartoDB.Positron") %>%
+    addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", num_white, ")")) %>%
+    addLegend("bottomright", 
+            pal = pal_all, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1)
+  } else leaflet()
+}))
+
+```
+
+Permutation Test
+=====================================
+### Step 2: Permutation Test{data-commentary-width=500}
+
+Test Page
+
+***
+
+The approximated **p-value** based on the permutation test was 
+
+3rd
+=====================================
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+### Visualizing Change in White population over time
+
+```{r}
+selectInput("cities_compare", "Choose a city:",
+      choices = cities, 
+      selected = cities[1])
+
+selectInput("year_left", "Left Map Year:",
+      c('1990', '2000', '2010'), 
+      selected = '1990')
+
+selectInput("year_right", "Right Map Year:",
+      c('1990', '2000', '2010'), 
+      selected = '2000')
+
+
+selectInput("palette2", "Choose a color palette:",
+            choices = color_choices, selected = color_choices[1])
+
+
+```
+
+Column
+-------------------------------------
+
+### Chart 1
+
+```{r}
+(map2<- renderLeaflet({                 
+  
+    tmp_left <- get(paste('cendat_',input$cities_compare,"_",input$year_left, sep = ""))
+    pct_white <- tmp_left$pct_white   
+    pal_all = colorNumeric(palette = input$palette2, domain = c(0,100))
+  
+  if (input$year_left == 1990){
+  num_white <- 'P0070001'
+} else if (input$year_left ==2000){
+  num_white <- 'P003003'
+}else{
+  num_white <-'P003002'
+}
+  
+  if(nrow(tmp_left) >= 1){
+    tmp_left %>% st_transform(crs = "+init=epsg:4326")%>%
+    leaflet() %>%  
+    addProviderTiles(provider = "CartoDB.Positron") %>%
+    addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all(pct_white),
+              label = ~paste0(pct_white, "%, (", num_white, ")")) %>%
+    addLegend("bottomright", 
+            pal = pal_all, 
+            values = ~ pct_white,
+            title = "Census Tract Pct White",
+            opacity = 1)
+  } else leaflet()
+}))
+
+```
+
+Column
+-------------------------------------
+   
+### Chart 2
+
+```{r}
+
+(map3<- renderLeaflet({                 
+
+    tmp_right <- get(paste('cendat_',input$cities_compare,"_",input$year_right, sep = ""))
+    pct_white2 <- tmp_right$pct_white   
+    pal_all2 = colorNumeric(palette = input$palette2, domain = c(0,100))
+
+  if (input$year_right == 1990){
+  num_white2 <- 'P0070001'
+} else if (input$year_right ==2000){
+  num_white2 <- 'P003003'
+}else{
+  num_white2 <-'P003002'
+}
+ 
+  if(nrow(tmp_right) >= 1){
+    tmp_right %>% st_transform(crs = "+init=epsg:4326")%>%
+    leaflet() %>%  
+    addProviderTiles(provider = "CartoDB.Positron") %>%
+    addPolygons(popup = ~ str_extract(NAME, "^([^,]*)"),
+              stroke = FALSE,
+              smoothFactor = 0,
+              fillOpacity = 0.5,
+              color = ~ pal_all2(pct_white2),
+              label = ~paste0(pct_white2, "%, (", num_white2, ")")) %>%
+    addLegend("bottomright", 
+            pal = pal_all2, 
+            values = ~ pct_white2,
+            title = "Census Tract Pct White",
+            opacity = 1)
+  } else leaflet()
+}))
+```   
+    
+
