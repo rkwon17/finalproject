@@ -50,15 +50,18 @@ selectInput("year", "Choose a year:",
 
 selectInput("palette", "Choose a color palette:",
             choices = color_choices, selected = color_choices[1])
-
-
-
 ```
+
+**Note: The map will update every time you change the city, year or color scheme. 
+
+Hovering over the pay will show the percentage of white people in the current tract as well as the number of white people (i.e. 35% (200) means the tract is 35% white with 200 white people according to the decennial census). 
+
+Clicking on an area of the map will tell you the name/number of the given tract. 
 
 Row {data-height = 500}
 -----------------------------------------------------------------------
 
-### Map
+### 
 ```{r} 
 (map1<- renderLeaflet({                 
   
@@ -111,7 +114,7 @@ The approximated **p-value** based on the permutation test was
 Column {.sidebar}
 -----------------------------------------------------------------------
 
-### Visualizing Change in White population over time
+### Comparing White population change over time
 
 ```{r}
 selectInput("cities_compare", "Choose a city:",
