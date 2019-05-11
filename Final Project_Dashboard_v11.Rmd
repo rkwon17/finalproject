@@ -50,6 +50,8 @@ selectInput("year", "Choose a year:",
 #Color Drop Down
 selectInput("palette", "Choose a color palette:",
             choices = color_choices, selected = color_choices[1])
+
+checkboxInput("reverse", label = "Reverse Colors?")
 ```
 
 **Note: The map will update every time you change the city, year or color scheme. 
@@ -80,7 +82,9 @@ Row
 }
  #set color pallate with range 0-100 for full spectrum 
    pal_all = colorNumeric(palette = input$palette, domain = c(0,100))
- 
+ if (input$reverse){
+   pal_all = colorNumeric(palette = input$palette, domain = c(0,100), reverse = TRUE)
+ }
   
   if(nrow(tmp) >= 1){
     tmp %>% st_transform(crs = "+init=epsg:4326")%>%
