@@ -101,15 +101,43 @@ Row {data-height = 500}
 
 Permutation Test
 =====================================
-### Step 2: Permutation Test{data-commentary-width=500}
+Column {.tabset .tabset-fade}
+-------------------------------------
+   
+### Figure X
+Put plot here
+```{r}
+```   
+ 
+### Figure Y 
+   Put Plot here (Y)
+```{r}
+```
 
-Test Page
+### Figure Z 
+   Put Plot here (Z)
+```{r}
+```
 
-***
+Column 
+-------------------------------------
+    
+### Analysis
+We decided to permute the years for the city of Boston to test the null hypothesis without making any assumptions about the distribution. The permutation test is important because it does not rely on assumptions such as normality by resampling the data many times in order to find a p-value for the permutation distribution. Thus, three permutation tests were performed for the following:
+
+ 1. Permuting 1990 & 2000
+ 2. Permuting 2000 & 2010
+ 3. Permuting 1990 & 2010
+
+If the null hypothesis is true, there changing the sampling of the year should have **no effect** on the outcome, percentage of white people in the census tracts. 					
+
+For the permutation test, we decided to create 10000 permutations of the assigned conditions. Then, for each of these events, we took the mean difference between the two years for that assignment. Next, we compared the distribution of mean differences we found through the permutation sampling to the observed mean difference. Figure X shows the distribution of mean differences from the permutation test and the vertical line is the observed mean difference in affect score between the years 1990 and 2000. Figure Y is the distribution of permuted mean differences between the years 2000 & 2010. Figure Z is the distribution of permuted mean differences between the years 1990 and 2010. For all three of the permutation tests, we can see that **we can successfully reject the null hypothesis** that there are no observed differences across the years for the percentage of white people in the city of Boston. However, we can see that over time, the observed mean difference is increasingly further away from the permuted distribution of mean differences, which can be seen in Figure Z. This confirms our hypothesis that over time, there have been changes in the percentage of white people in Boston. 
+```{r}
+```
 
 The approximated **p-value** based on the permutation test was 
 
-3rd
+Comparing Maps
 =====================================
 Column {.sidebar}
 -----------------------------------------------------------------------
