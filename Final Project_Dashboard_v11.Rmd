@@ -13,6 +13,7 @@ library(shiny)
 library(magrittr)
 library(stringr)
 library(RColorBrewer)
+library(viridis)
 
 #map libraries - need these to load shapefile
 library(leaflet)
