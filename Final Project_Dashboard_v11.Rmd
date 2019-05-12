@@ -3,6 +3,7 @@ title: "Is there evidence of White Flight in Boston over the last 20 years?"
 author: Rachel Kwon, Erin Mahoney, & Kevin Nazario
 output: 
   flexdashboard::flex_dashboard:
+    vertical_layout: fill
     theme: yeti
 runtime: shiny
 ---
@@ -248,3 +249,64 @@ For the permutation test, we decided to create 10000 permutations of the assigne
 
 The approximated **p-value** based on the permutation test was 
 
+Project Explanation
+=====================================
+What happens here 
+
+R Script
+=====================================
+This is the code we used to gather and prep the data, as well as perform the permutation tests and save the relevant datasets and objects
+
+Column { vertical_layout: scroll}
+-------------------------------------
+```{r, eval=F, echo=T}
+
+#### last update ####
+# Rachel 5/7 12:30 PM
+
+#### set up ####
+rm(list = ls())
+setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory 
+
+library(magrittr)
+library(texreg)
+library(dplyr)
+library(tidycensus)
+library(ggplot2)
+library(ggmap)
+library(stringr)
+library(tidyverse)
+library(leaflet)
+library(htmltools)
+library(tigris)
+library(acs)
+library(gridExtra)
+library(sf)
+
+
+#### prep for all maps ####
+vars1990 <- c('P0070001') #all white
+vars2000 <- c('P003003') #all white
+vars2010 <- c('P003002') #all white
+pal_all = colorNumeric(palette = "viridis", domain = c(0, 100))
+tag.map.title <- tags$style(HTML("
+                                 .leaflet-control.map-title { 
+                                 transform: translate(-50%,20%);
+                                 position: fixed !important;
+                                 left: 50%;
+                                 text-align: center;
+                                 padding-left: 10px; 
+                                 padding-right: 10px; 
+                                 background: rgba(255,255,255,0.75);
+                                 font-weight: bold;
+                                 font-size: 28px;
+                                 }
+                                 "))
+
+title1990 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 1990 Census")) 
+title2000 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 2000 Census")) 
+title2010 <- tags$div(
+  tag.map.title, HTML("Racial Diversity: 2010 Census")) 
+```
