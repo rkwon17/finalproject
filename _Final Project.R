@@ -185,6 +185,7 @@ year2010 <- as.data.frame(year2010)
 cendat_MA_1990 <- as.data.frame(cendat_MA_1990)
 cendat_MA_2000 <- as.data.frame(cendat_MA_2000)
 cendat_MA_2010 <- as.data.frame(cendat_MA_2010)
+#add years dataframe to census dataframe
 testing_cendat_MA_2000 <- cbind(cendat_MA_2000,year2000)
 testing_cendat_MA_1990 <- cbind(cendat_MA_1990,year1990)
 testing_cendat_MA_2010 <- cbind(cendat_MA_2010,year2010)
@@ -238,6 +239,7 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 
 #distibution of mean diffs 
 plot1 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2000 census")
+#plot
 plot1
 
 #### permutation for 2000-2010-------------------------------------------------------
@@ -260,6 +262,7 @@ means <- tapply(testing_MA_2000_2010$pct_white, testing_MA_2000_2010$year, mean,
 observed_mean <- means['2010'] - means['2000']
 mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot2 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 2000 & 2010 census")
+#plot
 plot2
 
 #### permutation for 1990-2010-------------------------------------------------------
@@ -283,6 +286,7 @@ means <- tapply(testing_MA_1990_2010$pct_white, testing_MA_1990_2010$year, mean,
 observed_mean <- means['2010'] - means['1990']
 mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot3 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2010 census")
+#plot
 plot3
 
 #### save permutation plots ####
