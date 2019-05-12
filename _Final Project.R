@@ -7,7 +7,6 @@
 
 #### set up ####
 rm(list = ls())
-setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory 
 
 library(magrittr)
 library(texreg)
