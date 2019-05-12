@@ -266,9 +266,68 @@ For the permutation test, we decided to create 10000 permutations of the assigne
 
 The approximated **p-value** based on the permutation test was 
 
-Project Explanation
+Project Narrative/Write-Up
 =====================================
-What happens here 
+Column 
+------------------------------------- 
+### 
+
+**The original question:**
+
+We began this final project with an interest in population demographic data and creating visualizations, and settled on a goal: can we visualize racial population movement (a subset of which is often referred to as "white flight") over time, particularly in urban areas?
+
+**Dataset**
+
+To understand population demographics and movement over time, we considered using either the decennial census or the (annual) American Community Survey, and spent a considerable amount of time exploring the data available from each. We ultimately concluded that the ACS, which admittedly provides more granular data on a time scale, would likely not provide us any meaningful data about changes over time. ACS data is available by API for only a few years within the last decade, whereas the decennial census allows us to gather data spanning multiple decades. Furthermore, ACS data takes a population sample and gathers data about them to extrapolate to the full United States population, whereas the decennial census attempts to tabulate population numbers, a feature which we found more directly applicable to our goals.
+
+**Timescale**
+
+The decennial census is available by API for three rollouts of the census: 1990, 2000, and 2010, so we chose to use these three years of data. As a side note, we're guessing that the fact these are the only data available may be related to the fact that the 1990 census was the first one in which the entirety of the country was broken into census tracts; in previous census rollouts, census tracts covered only urban areas. 
+
+**Geometry**
+
+Although initially we began collecting and displaying data by zip code, with the rationale that zip codes are generally publicly known and easily understood, we ultimately chose to gather and display data by census tract. Tracts are drawn by the Census Bureau and meant to be roughly equivalent to a neighborhood, with 2,500-8,000 people per tract. These were the smallest/most granular way for us to collect and display data, which allowed us to visualize changes with the greatest detail. Within urban areas, the changing demographic patterns over time are often highly localized, down to even a few blocks. 
+
+**Variables**
+
+Initially, we searched for all of the relevant race-relevant variables in the 3 datasets (1990, 2000, 2010) in order to compare and determine what would best allow us to compare change over time. Each of the census years splits race a bit differently; in other words, race variables change significantly from one rollout of the census to the next. We ultimately chose to use, from each census year, the variable most closely corresponding to the number of people in each census tract who self-identified as white (regardless of those who marked Hispanic/Latinx ethnicity, which we would have liked to exclude from these numbers but were counted differently across the years). 
+
+While our initial goal was to then expand and gather variables referring to other individual racial categories, we ultimately chose not to do this. While we recognize the value of collecting these data and displaying each racial category separately, we could not easily find continuity in these categories over time, which makes comparisons difficult. Further, we wanted each city's data to be easily displayed in a single map, and did not see a way to display numbers of several racial categories at a time without making the map overly complicated and uninterpretable. 
+
+**Cities**
+
+We decided to look at Boston and our hometowns to see if there were any trends in racial movement over the years.   
+
+* Boston, MA - our current home!  
+* District of Columbia - Erin's hometown!  
+* Oakland/Bay Area, CA-  Kevin's hometown!  
+* Knoxville, TN - Rachel's hometown!  
+
+We found an article written by a collective of data scientists at Priceonomics titled, "How Diverse is Your City?" ("How Diverse is Your City", 2014).  The data scientists used ACS datasets to look into the diversity of the larger metropolitan areas of the nation. We chose some of the cities we found interesting from their findings.
+
+* Seattle, WA - According to article, white people make up a large percentage of the population.    
+* Portland, OR- Between 2000 and 2010, nearly 10,000 people of color moved out of the city. We wanted to see if we could visualize this.   
+* Detroit, MI - The article mentioned that Detroit is a very diverse city, at 80.7% black when the article was written.   
+
+**Visualizations/Dashboard**
+
+We chose to display our visualizations in a dashboard because it allows for maximum interaction by the user, and allows for us to display a large number of visualizations in one place. 
+
+Our dashboard allows for two types of views: one allowing the user to visualize individual maps, encouraging for examination of a single city's population racial distribution at a single point in time. The user can hover over any census tract for more information about the percent of the population that is white, and the number (magnitude) corresponding to that percent. 
+
+
+The other view allows a user to compare two maps directly: within the same city, the user can compare the population's racial distribution at two different points in time. The scales and legend were adjusted to not change based on the data provided in order to ensure that the colors across years represented the same values for valid comparison when viewed visually. 
+
+**Permutation Test**
+
+We ran a permutation test only for the city of Boston. We decided to resample the years (i.e. 1990, 2000, 2010). **Null hypothesis:** racial distribution across areas of Boston has remained the same over time
+See permutation tab of dashboard for the in-depth analysis and rationale
+
+**References**
+
+How Diverse is Your City? (2014). Retrieved May 12, 2019, from Priceonomics website: []http://priceonomics.com/how-diverse-is-your-city/
+
+
 
 R Script
 =====================================
