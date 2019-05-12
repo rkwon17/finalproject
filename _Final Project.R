@@ -420,16 +420,10 @@ save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, cendat_DC_1990, cendat_DC_2
 
 ###----------rachel experimenting with permutation------------
 #read csv files for year csv files
-setwd("~/Desktop")
-year2000 <- read.csv("/Users/rachelkwon/Desktop/year2000.csv")
-year1990 <- read.csv("/Users/rachelkwon/Desktop/year1990.csv")
-year2010 <- read.csv("/Users/rachelkwon/Desktop/year2010.csv")
-dim(year1990)
-dim(year2000)
-dim(year2010)
-dim(cendat_MA_2010)
-dim(cendat_MA_1990)
-dim(cendat_MA_2000)
+#all these files are in your github path
+year2000 <- read.csv("year2000.csv")
+year1990 <- read.csv("year1990.csv")
+year2010 <- read.csv("year2010.csv")
 
 #merge year dataframes to cendat data 
 ###------convert everything to dataframes for permutation tests-----------
@@ -453,9 +447,9 @@ sub_testing_cendat_MA_1990 <- subset(sub_testing_cendat_MA_1990,select=c(NAME,GE
 
 sub_testing_cendat_MA_2010 <- as.data.frame(testing_cendat_MA_2010[,c('NAME','GEOID','year','pct_white')])
 sub_testing_cendat_MA_2010 <- subset(sub_testing_cendat_MA_2010,select=c(NAME,GEOID,year,pct_white))
-summary(sub_testing_cendat_MA_1990)
-summary(sub_testing_cendat_MA_2000)
-summary(sub_testing_cendat_MA_2010) #5NA's
+#summary(sub_testing_cendat_MA_1990)
+#summary(sub_testing_cendat_MA_2000)
+#summary(sub_testing_cendat_MA_2010) #5NA's
 
 #sub_testing_cendat_MA_2000$geometry <- NULL
 #sub_testing_cendat_MA_1990$geometry <- NULL
@@ -499,23 +493,16 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 #distibution of mean diffs 
 plot1 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2000 census")
 plot1
-densities <- density(mean_diffs$mean_diffs)
-plot_dat <- data.frame(x = densities$x, y = densities$y)
-#density plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
+#densities <- density(mean_diffs$mean_diffs)
+#plot_dat <- data.frame(x = densities$x, y = densities$y)
 
-#symmetric plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
 
 ###---permutation for 2000-2010-------------------------------------------------------
 set.seed(1)
 testing_MA_2000_2010$year_permuted <- sample(testing_MA_2000_2010$year)
 testing_MA_2000_2010[c('year', 'year_permuted')]
 #ttest
-t.test(pct_white ~ year_permuted, testing_MA_2000_2010)
+#t.test(pct_white ~ year_permuted, testing_MA_2000_2010)
 R <- 10000
 mean_diffs <- rep(NA, R)
 #for loop for permuting
@@ -531,17 +518,8 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 #this graph is suspect - look at it later
 plot2 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 2000 & 2010 census")
 plot2
-densities <- density(mean_diffs$mean_diffs)
-plot_dat <- data.frame(x = densities$x, y = densities$y)
-#density plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
-
-#symmetric plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
-
+#densities <- density(mean_diffs$mean_diffs)
+#plot_dat <- data.frame(x = densities$x, y = densities$y)
 
 
 ###---permutation for 1990-2010-------------------------------------------------------
@@ -566,16 +544,9 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot3 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2010 census")
 plot3
 
-densities <- density(mean_diffs$mean_diffs)
-plot_dat <- data.frame(x = densities$x, y = densities$y)
+#densities <- density(mean_diffs$mean_diffs)
+#plot_dat <- data.frame(x = densities$x, y = densities$y)
 #density plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) + 
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2) 
-
-#symmetric plot
-ggplot(plot_dat, aes(x = x, y = y)) + geom_line() + geom_area(data = subset(plot_dat, x >= observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_area(data = subset(plot_dat, x <= -observed_mean), fill = 'salmon2', alpha = .5) +
-  geom_vline(xintercept = observed_mean, col = 'red', lty = 2)
 
 
 #### OLD/ARCHIVE testing pulls - can these be deleted? ####
