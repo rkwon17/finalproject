@@ -61,6 +61,7 @@ cendat_MA_2010$pct_white <- round(cendat_MA_2010$P003002 / cendat_MA_2010$summar
 cendat_MA_2000$pct_white <- round(cendat_MA_2000$P003003 / cendat_MA_2000$summary_value, 3) * 100 
 cendat_MA_1990$pct_white <- round(cendat_MA_1990$P0070001 / cendat_MA_1990$summary_value, 3) * 100 
 
+# Remove NAs from datasets
 cendat_MA_2010 %<>% subset(!is.na(pct_white))
 cendat_MA_2000 %<>% subset(!is.na(pct_white))
 cendat_MA_1990 %<>% subset(!is.na(pct_white))
