@@ -1,3 +1,10 @@
+#### documentation ####
+# Erin Mahoney, Rachel Kwon, Kevin Nazario
+# S022, Spring 2019
+# Final Project
+# Topic: Racial Population Distribution in US Cities
+# Note: See related RMD file to compile and run dashboard. 
+
 #### set up ####
 rm(list = ls())
 setwd('c:/users/juggl_000/Desktop/R Scripts') # set directory 
