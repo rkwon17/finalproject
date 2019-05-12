@@ -242,6 +242,11 @@ plot1 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline
 #plot
 plot1
 
+#p value
+pvalue1 <- 2*mean(mean_diffs <= observed_mean)
+pvalue1
+
+
 #### permutation for 2000-2010-------------------------------------------------------
 set.seed(1)
 testing_MA_2000_2010$year_permuted <- sample(testing_MA_2000_2010$year)
@@ -264,6 +269,9 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot2 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 2000 & 2010 census")
 #plot
 plot2
+#p-value
+pvalue2 <- 2*mean(mean_diffs <= observed_mean)
+pvalue2
 
 #### permutation for 1990-2010-------------------------------------------------------
 set.seed(1)
@@ -288,6 +296,9 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot3 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2010 census")
 #plot
 plot3
+#p value
+pvalue3 <- round(2*mean(mean_diffs <= observed_mean))
+pvalue3
 
 #### save permutation plots ####
 save(plot1, plot2, plot3, file = 'C:/Users/Erin/Documents/GitHub/finalproject/SavedPlots.Rdata')
