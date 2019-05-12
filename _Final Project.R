@@ -545,6 +545,8 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot3 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2010 census")
 plot3
 
+save(plot1, plot2, plot3, file = 'C:/Users/Erin/Documents/GitHub/finalproject/SavedPlots.Rdata')
+
 #densities <- density(mean_diffs$mean_diffs)
 #plot_dat <- data.frame(x = densities$x, y = densities$y)
 #density plot
