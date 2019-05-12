@@ -1,5 +1,5 @@
 ---
-title: "Is there evidence of White Flight in Boston over the last 20 years?"
+title: "Racial Distribution Across U.S. Urban Populations"
 author: Rachel Kwon, Erin Mahoney, & Kevin Nazario
 output: 
   flexdashboard::flex_dashboard:
@@ -38,7 +38,7 @@ Maps{data-orientation=rows}
 Column {.sidebar} 
 -----------------------------------------------------------------------
 
-### Visualizing Change in White population over time
+### Visualizing Change in White vs. Non-White population over time
 
 ```{r}
 #City Dropdown
@@ -56,7 +56,7 @@ selectInput("palette", "Choose a color palette:",
 checkboxInput("reverse", label = "Reverse Colors?")
 ```
 
-**Note: The map will update every time you change the city, year or color scheme. 
+**Note:** The map will update every time you change the city, year or color scheme. 
 
 Hovering over the map will show the percentage of white people in the current tract as well as the number of white people (i.e. 35% (200) means the tract is 35% white with 200 white people according to the decennial census). 
 
@@ -113,7 +113,7 @@ Comparing Maps
 Column {.sidebar}
 -----------------------------------------------------------------------
 
-### Comparing White population change over time
+### Comparing White vs Non-White Population between time points
 
 ```{r}
 selectInput("cities_compare", "Choose a city:",
@@ -135,7 +135,7 @@ selectInput("palette2", "Choose a color palette:",
 checkboxInput("reverse2", label = "Reverse Colors?")
 ```
 
-Note: The map will update every time you change the city, year or color scheme. 
+**Note:** The map will update every time you change the city, year or color scheme. 
 
 You can compare the same city across years by changing the Left and Right Map Year options
 
@@ -260,11 +260,13 @@ We decided to permute the years for the city of Boston to test the null hypothes
 
 If the null hypothesis is true, there changing the sampling of the year should have **no effect** on the outcome, percentage of white people in the census tracts. 					
 
-For the permutation test, we decided to create 10000 permutations of the assigned conditions. Then, for each of these events, we took the mean difference between the two years for that assignment. Next, we compared the distribution of mean differences we found through the permutation sampling to the observed mean difference. **Figure X** shows the distribution of mean differences from the permutation test and the vertical line is the observed mean difference in affect score between the years 1990 and 2000. **Figure Y** is the distribution of permuted mean differences between the years 2000 & 2010. **Figure Z** is the distribution of permuted mean differences between the years 1990 and 2010. For all three of the permutation tests, we can see that **we can successfully reject the null hypothesis** that there are no observed differences across the years for the percentage of white people in the city of Boston. However, we can see that over time, the observed mean difference is increasingly further away from the permuted distribution of mean differences, which can be seen in Figure Z. This confirms our hypothesis that over time, there have been changes in the percentage of white people in Boston. 
-```{r}
-```
+For the permutation test, we decided to create 10000 permutations of the assigned conditions. Then, for each of these events, we took the mean difference between the two years for that assignment. Next, we compared the distribution of mean differences we found through the permutation sampling to the observed mean difference. 
 
-The approximated **p-value** based on the permutation test was 
+**Figure X** shows the distribution of mean differences from the permutation test and the vertical line is the observed mean difference in affect score between the years 1990 and 2000.  
+**Figure Y** is the distribution of permuted mean differences between the years 2000 & 2010.  
+**Figure Z** is the distribution of permuted mean differences between the years 1990 and 2010.  
+
+For all three of the permutation tests, we can see that **we can successfully reject the null hypothesis** that there are no observed differences across the years for the percentage of white people in the city of Boston (**p < .001 in all cases**).  
 
 Project Narrative/Write-Up
 =====================================
@@ -579,6 +581,11 @@ plot1 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline
 #plot
 plot1
 
+#p value
+pvalue1 <- 2*mean(mean_diffs <= observed_mean)
+pvalue1
+
+
 #### permutation for 2000-2010-------------------------------------------------------
 set.seed(1)
 testing_MA_2000_2010$year_permuted <- sample(testing_MA_2000_2010$year)
@@ -601,6 +608,9 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot2 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 2000 & 2010 census")
 #plot
 plot2
+#p-value
+pvalue2 <- 2*mean(mean_diffs <= observed_mean)
+pvalue2
 
 #### permutation for 1990-2010-------------------------------------------------------
 set.seed(1)
@@ -625,6 +635,9 @@ mean_diffs <- data.frame(mean_diffs = mean_diffs)
 plot3 <- ggplot(mean_diffs, aes(x = mean_diffs)) + geom_histogram() + geom_vline(xintercept = observed_mean, col = 'red', lty = 2) + ggtitle("Distribution of permuted mean differences: \nBoston 1990 & 2010 census")
 #plot
 plot3
+#p value
+pvalue3 <- round(2*mean(mean_diffs <= observed_mean))
+pvalue3
 
 #### save permutation plots ####
 save(plot1, plot2, plot3, file = 'C:/Users/Erin/Documents/GitHub/finalproject/SavedPlots.Rdata')
@@ -637,3 +650,4 @@ load("SavedPlots.Rdata")
 
 save(cendat_MA_1990, cendat_MA_2000, cendat_MA_2010, cendat_DC_1990, cendat_DC_2000, cendat_DC_2010, cendat_CA_1990, cendat_CA_2000, cendat_CA_2010, cendat_OR_1990, cendat_OR_2000, cendat_OR_2010, cendat_WA_1990, cendat_WA_2000, cendat_WA_2010, cendat_TN_1990, cendat_TN_2000, cendat_TN_2010, cendat_MI_1990, cendat_MI_2000, cendat_MI_2010, plot1, plot2, plot3, file = 'C:/Users/Erin/Documents/GitHub/finalproject/Saved.Rdata')
 ```
+
